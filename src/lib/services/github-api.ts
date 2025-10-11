@@ -90,10 +90,12 @@ export class GitHubApiClient {
 			}
 		}
 
-		// Return as array, sorted by most recent first
-		return Array.from(workflowMap.values()).sort((a, b) =>
-			new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-		);
+		// Return as array, sorted alphabetically by workflow name
+		return Array.from(workflowMap.values()).sort((a, b) => {
+			const nameA = (a.name || 'unknown-workflow').toLowerCase();
+			const nameB = (b.name || 'unknown-workflow').toLowerCase();
+			return nameA.localeCompare(nameB);
+		});
 	}
 
 	async getRepositoryStatus(repository: Repository, maxRunsToFetch: number = 20): Promise<{
