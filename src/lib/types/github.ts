@@ -14,7 +14,7 @@ export interface Config {
 	};
 	dashboard: {
 		refresh_interval: number;
-		max_runs_per_repo: number;
+		max_runs_to_fetch: number;
 		show_statuses: string[];
 	};
 }

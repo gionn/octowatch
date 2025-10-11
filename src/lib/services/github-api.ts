@@ -56,7 +56,7 @@ export class GitHubApiClient {
 		return this.makeRequest<GitHubRepository>(`/repos/${owner}/${repo}`);
 	}
 
-	async getWorkflowRuns(owner: string, repo: string, branch?: string, limit: number = 5): Promise<WorkflowRun[]> {
+	async getWorkflowRuns(owner: string, repo: string, branch?: string, limit: number = 20): Promise<WorkflowRun[]> {
 		let endpoint = `/repos/${owner}/${repo}/actions/runs?per_page=${limit}`;
 
 		if (branch) {
@@ -67,22 +67,47 @@ export class GitHubApiClient {
 		return response.workflow_runs;
 	}
 
-	async getRepositoryStatus(repository: Repository): Promise<{
+	private deduplicateWorkflowRuns(workflowRuns: WorkflowRun[]): WorkflowRun[] {
+		const workflowMap = new Map<string, WorkflowRun>();
+
+		// Sort by updated_at to ensure we process most recent first
+		const sortedRuns = [...workflowRuns].sort((a, b) =>
+			new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+		);
+
+		// Keep only the most recent run for each workflow name
+		for (const run of sortedRuns) {
+			const workflowKey = run.name || 'unknown-workflow';
+			if (!workflowMap.has(workflowKey)) {
+				workflowMap.set(workflowKey, run);
+			}
+		}
+
+		// Return as array, sorted by most recent first
+		return Array.from(workflowMap.values()).sort((a, b) =>
+			new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+		);
+	}
+
+	async getRepositoryStatus(repository: Repository, maxRunsToFetch: number = 20): Promise<{
 		repository: Repository;
 		workflowRuns: WorkflowRun[];
 		error?: string;
 	}> {
 		try {
-			const workflowRuns = await this.getWorkflowRuns(
+			const allWorkflowRuns = await this.getWorkflowRuns(
 				repository.owner,
 				repository.name,
 				repository.branch,
-				5
+				maxRunsToFetch
 			);
+
+			// Deduplicate to keep only the latest run per workflow
+			const uniqueWorkflowRuns = this.deduplicateWorkflowRuns(allWorkflowRuns);
 
 			return {
 				repository,
-				workflowRuns
+				workflowRuns: uniqueWorkflowRuns
 			};
 		} catch (error) {
 			return {
@@ -93,7 +118,7 @@ export class GitHubApiClient {
 		}
 	}
 
-	async getAllRepositoryStatuses(repositories: Repository[]): Promise<Array<{
+	async getAllRepositoryStatuses(repositories: Repository[], maxRunsToFetch: number = 20): Promise<Array<{
 		repository: Repository;
 		workflowRuns: WorkflowRun[];
 		error?: string;
@@ -101,7 +126,7 @@ export class GitHubApiClient {
 		const enabledRepositories = repositories.filter(repo => repo.enabled);
 
 		// Process repositories in parallel, but with some throttling
-		const promises = enabledRepositories.map(repo => this.getRepositoryStatus(repo));
+		const promises = enabledRepositories.map(repo => this.getRepositoryStatus(repo, maxRunsToFetch));
 
 		return Promise.all(promises);
 	}

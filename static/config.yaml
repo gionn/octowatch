@@ -34,8 +34,8 @@ dashboard:
   # Auto-refresh interval in seconds
   refresh_interval: 30
 
-  # Maximum number of workflow runs to display per repository
-  max_runs_per_repo: 5
+  # Maximum number of workflow runs to fetch per repository (deduplicates to latest per workflow)
+  max_runs_to_fetch: 20
 
   # Show only specific workflow statuses (success, failure, in_progress, cancelled)
   show_statuses: ["success", "failure", "in_progress"]

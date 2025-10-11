@@ -107,7 +107,7 @@
 
 			apiClient = new GitHubApiClient(config.github.api_url, config.github.token);
 
-			repositoryStatuses = await apiClient.getAllRepositoryStatuses(config.repositories);
+			repositoryStatuses = await apiClient.getAllRepositoryStatuses(config.repositories, config.dashboard.max_runs_to_fetch);
 			lastUpdated = new Date();
 			loading = false;
 		} catch (err) {
@@ -331,12 +331,12 @@
 										      class:in-progress={run.status === 'in_progress' || run.status === 'queued'}
 										      class:cancelled={run.status === 'completed' && run.conclusion === 'cancelled'}
 										      class:unknown={run.status === 'completed' && !run.conclusion}>
-											{#if run.status === 'in_progress' || run.status === 'queued'}
+											{#if run.status === 'in_progress'}
 												IN PROGRESS
+											{:else if run.status === 'queued'}
+												QUEUED
 											{:else if run.status === 'completed'}
 												{run.conclusion?.toUpperCase() || 'UNKNOWN'}
-											{:else}
-												{run.status.toUpperCase()}
 											{/if}
 										</span>
 									</td>

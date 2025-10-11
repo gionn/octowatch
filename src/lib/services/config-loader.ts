@@ -50,9 +50,14 @@ export async function loadConfigFromYaml(yamlContent: string): Promise<Config> {
 		config.github = config.github || { api_url: 'https://api.github.com' };
 		config.dashboard = config.dashboard || {
 			refresh_interval: 30,
-			max_runs_per_repo: 5,
+			max_runs_to_fetch: 20,
 			show_statuses: ['success', 'failure', 'in_progress']
 		};
+
+		// Handle legacy config field name
+		if ('max_runs_per_repo' in config.dashboard) {
+			config.dashboard.max_runs_to_fetch = (config.dashboard as any).max_runs_per_repo;
+		}
 
 		return config;
 	} catch (error) {
