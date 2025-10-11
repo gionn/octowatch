@@ -9,6 +9,13 @@ export class GitHubApiClient {
 		this.token = token;
 	}
 
+	/**
+	 * Update the GitHub token for this client instance
+	 */
+	updateToken(token?: string): void {
+		this.token = token;
+	}
+
 	private getHeaders(): HeadersInit {
 		const headers: HeadersInit = {
 			'Accept': 'application/vnd.github.v3+json',

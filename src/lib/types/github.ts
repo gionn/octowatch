@@ -9,7 +9,6 @@ export interface Repository {
 export interface Config {
 	repositories: Repository[];
 	github: {
-		token?: string;
 		api_url: string;
 	};
 	dashboard: {

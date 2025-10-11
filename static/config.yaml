@@ -22,10 +22,6 @@ repositories:
 
 # GitHub API settings
 github:
-  # GitHub Personal Access Token (optional, but recommended for higher rate limits)
-  # You can set this as an environment variable: GITHUB_TOKEN
-  token: ""
-
   # API base URL (for GitHub Enterprise, change this)
   api_url: "https://api.github.com"
 

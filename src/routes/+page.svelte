@@ -3,6 +3,7 @@
 	import RefreshButton from '$lib/components/RefreshButton.svelte';
 	import { loadConfig, getCachedConfig } from '$lib/services/config-loader.js';
 	import { GitHubApiClient } from '$lib/services/github-api.js';
+	import { TokenStorage } from '$lib/services/token-storage.js';
 	import { formatDate } from '$lib/utils/date-formatter.js';
 	import type { Repository, WorkflowRun, Config } from '$lib/types/github.js';
 
@@ -22,6 +23,12 @@
 	// Track which repositories are expanded
 	let expandedRepos = new Set<string>();
 
+	// Token settings popup state
+	let showTokenPopup = false;
+	let tokenInput = '';
+	let tokenStatus = '';
+	let hasToken = false;
+
 	function toggleRepository(repoKey: string) {
 		if (expandedRepos.has(repoKey)) {
 			expandedRepos.delete(repoKey);
@@ -33,6 +40,49 @@
 
 	function getRepositoryKey(repo: Repository): string {
 		return `${repo.owner}/${repo.name}`;
+	}
+
+	function openTokenPopup() {
+		tokenInput = TokenStorage.getToken() || '';
+		tokenStatus = '';
+		showTokenPopup = true;
+	}
+
+	function closeTokenPopup() {
+		showTokenPopup = false;
+		tokenInput = '';
+		tokenStatus = '';
+	}
+
+	function saveToken() {
+		if (!tokenInput.trim()) {
+			TokenStorage.removeToken();
+			hasToken = false;
+			tokenStatus = 'Token removed successfully';
+		} else if (TokenStorage.isValidTokenFormat(tokenInput)) {
+			TokenStorage.setToken(tokenInput);
+			hasToken = true;
+			tokenStatus = 'Token saved successfully';
+
+			// Update the API client with the new token
+			if (apiClient) {
+				apiClient.updateToken(tokenInput.trim());
+			}
+		} else {
+			tokenStatus = 'Invalid token format. Please check your GitHub token.';
+			return;
+		}
+
+		// Auto-close popup after successful save
+		if (!tokenStatus.includes('Invalid')) {
+			setTimeout(() => {
+				closeTokenPopup();
+			}, 1500);
+		}
+	}
+
+	function loadTokenFromStorage() {
+		hasToken = TokenStorage.hasToken();
 	}
 
 	function getCumulativeStatus(workflowRuns: WorkflowRun[]): {
@@ -105,7 +155,9 @@
 				config = getCachedConfig() || await loadConfig();
 			}
 
-			apiClient = new GitHubApiClient(config.github.api_url, config.github.token);
+			// Get token from localStorage instead of config
+			const token = TokenStorage.getToken();
+			apiClient = new GitHubApiClient(config.github.api_url, token || undefined);
 
 			repositoryStatuses = await apiClient.getAllRepositoryStatuses(config.repositories, config.dashboard.max_runs_to_fetch);
 			lastUpdated = new Date();
@@ -164,6 +216,7 @@
 	}
 
 	onMount(() => {
+		loadTokenFromStorage();
 		loadRepositories(true);
 		setupConfigWatcher();
 	});
@@ -184,8 +237,21 @@
 
 <div class="dashboard">
 	<header>
-		<h1>GitHub Actions Workflow Monitor</h1>
-		<p>Monitor GitHub Actions workflows across multiple repositories</p>
+		<div class="header-content">
+			<div class="header-text">
+				<h1>GitHub Actions Workflow Monitor</h1>
+				<p>Monitor GitHub Actions workflows across multiple repositories</p>
+			</div>
+			<div class="header-actions">
+				<button class="settings-btn" on:click={openTokenPopup} title="GitHub Token Settings">
+					<svg class="gear-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<circle cx="12" cy="12" r="3"></circle>
+						<path d="M12 1v6m0 10v6m11-7h-6m-10 0H1m15.5-6.5l-4.24 4.24M7.76 7.76L3.52 3.52m12.96 12.96l-4.24-4.24M7.76 16.24L3.52 20.48"></path>
+					</svg>
+					<span class="token-indicator" class:has-token={hasToken}></span>
+				</button>
+			</div>
+		</div>
 	</header>
 
 	<div class="controls">
@@ -361,24 +427,127 @@
 	{/if}
 </div>
 
+<!-- Token Settings Popup -->
+{#if showTokenPopup}
+	<div class="popup-overlay" on:click={closeTokenPopup} on:keydown={(e) => e.key === 'Escape' && closeTokenPopup()} role="dialog" aria-modal="true">
+		<div class="popup-content" on:click|stopPropagation role="document">
+			<div class="popup-header">
+				<h3>GitHub Token Settings</h3>
+				<button class="close-btn" on:click={closeTokenPopup}>&times;</button>
+			</div>
+			<div class="popup-body">
+				<p>Enter your GitHub Personal Access Token to avoid rate limits and access private repositories.</p>
+				<div class="form-group">
+					<label for="token-input">GitHub Token:</label>
+					<input
+						type="password"
+						id="token-input"
+						bind:value={tokenInput}
+						placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						class="token-input"
+					/>
+				</div>
+				{#if tokenStatus}
+					<div class="token-status" class:success={!tokenStatus.includes('Invalid')} class:error={tokenStatus.includes('Invalid')}>
+						{tokenStatus}
+					</div>
+				{/if}
+				<div class="form-actions">
+					<button class="btn btn-primary" on:click={saveToken}>
+						{tokenInput.trim() ? 'Save Token' : 'Remove Token'}
+					</button>
+					<button class="btn btn-secondary" on:click={closeTokenPopup}>Cancel</button>
+				</div>
+			</div>
+			<div class="popup-footer">
+				<p><small>
+					<a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">
+						Create a new token on GitHub
+					</a>
+				</small></p>
+			</div>
+		</div>
+	</div>
+{/if}
+
 <style>
 	.dashboard {
 		min-height: 100vh;
 	}
 
 	header {
-		text-align: center;
 		margin-bottom: 2rem;
 	}
 
-	header h1 {
-		color: #333;
-		margin-bottom: 0.5rem;
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 1rem;
 	}
 
-	header p {
+	.header-text {
+		text-align: center;
+		flex: 1;
+	}
+
+	.header-text h1 {
+		color: #333;
+		margin-bottom: 0.5rem;
+		margin: 0;
+	}
+
+	.header-text p {
 		color: #666;
 		font-size: 1.1rem;
+		margin: 0.5rem 0 0 0;
+	}
+
+	.header-actions {
+		display: flex;
+		align-items: center;
+	}
+
+	.settings-btn {
+		position: relative;
+		background: none;
+		border: 2px solid #ddd;
+		border-radius: 50%;
+		width: 48px;
+		height: 48px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		color: #666;
+	}
+
+	.settings-btn:hover {
+		border-color: #007cba;
+		color: #007cba;
+		transform: rotate(90deg);
+	}
+
+	.gear-icon {
+		width: 24px;
+		height: 24px;
+	}
+
+	.token-indicator {
+		position: absolute;
+		top: 2px;
+		right: 2px;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background-color: #dc3545;
+		border: 2px solid white;
+	}
+
+	.token-indicator.has-token {
+		background-color: #28a745;
 	}
 
 	.loading, .error, .empty-state {
@@ -754,6 +923,215 @@
 
 		.workflow-cell {
 			max-width: 150px;
+		}
+
+		.header-content {
+			flex-direction: column;
+			text-align: center;
+		}
+
+		.settings-btn {
+			margin-top: 1rem;
+		}
+	}
+
+	/* Popup Styles */
+	.popup-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+		animation: fadeIn 0.2s ease;
+	}
+
+	.popup-content {
+		background: white;
+		border-radius: 8px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		max-width: 500px;
+		width: 90%;
+		max-height: 90vh;
+		overflow-y: auto;
+		animation: slideIn 0.2s ease;
+	}
+
+	.popup-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5rem 1.5rem 1rem 1.5rem;
+		border-bottom: 1px solid #eee;
+	}
+
+	.popup-header h3 {
+		margin: 0;
+		color: #333;
+	}
+
+	.close-btn {
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		cursor: pointer;
+		color: #666;
+		padding: 0;
+		width: 30px;
+		height: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		transition: background-color 0.2s ease;
+	}
+
+	.close-btn:hover {
+		background-color: #f5f5f5;
+		color: #333;
+	}
+
+	.popup-body {
+		padding: 1.5rem;
+	}
+
+	.popup-body p {
+		margin-bottom: 1rem;
+		color: #666;
+		line-height: 1.5;
+	}
+
+	.form-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.form-group label {
+		display: block;
+		margin-bottom: 0.5rem;
+		font-weight: 500;
+		color: #333;
+	}
+
+	.token-input {
+		width: 100%;
+		padding: 0.75rem;
+		border: 2px solid #ddd;
+		border-radius: 4px;
+		font-size: 1rem;
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		transition: border-color 0.2s ease;
+	}
+
+	.token-input:focus {
+		outline: none;
+		border-color: #007cba;
+	}
+
+	.token-status {
+		padding: 0.75rem;
+		border-radius: 4px;
+		margin-bottom: 1rem;
+		font-size: 0.9rem;
+	}
+
+	.token-status.success {
+		background-color: #d4edda;
+		color: #155724;
+		border: 1px solid #c3e6cb;
+	}
+
+	.token-status.error {
+		background-color: #f8d7da;
+		color: #721c24;
+		border: 1px solid #f5c6cb;
+	}
+
+	.form-actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: flex-end;
+	}
+
+	.btn {
+		padding: 0.75rem 1.5rem;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 1rem;
+		transition: background-color 0.2s ease;
+	}
+
+	.btn-primary {
+		background-color: #007cba;
+		color: white;
+	}
+
+	.btn-primary:hover {
+		background-color: #005a87;
+	}
+
+	.btn-secondary {
+		background-color: #6c757d;
+		color: white;
+	}
+
+	.btn-secondary:hover {
+		background-color: #545b62;
+	}
+
+	.popup-footer {
+		padding: 1rem 1.5rem;
+		border-top: 1px solid #eee;
+		background-color: #f8f9fa;
+		border-radius: 0 0 8px 8px;
+	}
+
+	.popup-footer p {
+		margin: 0;
+		text-align: center;
+	}
+
+	.popup-footer a {
+		color: #007cba;
+		text-decoration: none;
+	}
+
+	.popup-footer a:hover {
+		text-decoration: underline;
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateY(-20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (max-width: 768px) {
+		.popup-content {
+			width: 95%;
+			margin: 1rem;
+		}
+
+		.form-actions {
+			flex-direction: column;
+		}
+
+		.btn {
+			width: 100%;
 		}
 	}
 </style>
