@@ -1,43 +1,40 @@
 import yaml from 'js-yaml';
 import type { Config } from '../types/github.js';
 
+// Configuration cache and watching
+let configCache: Config | null = null;
+let configTimestamp: number = 0;
+
 export async function loadConfig(): Promise<Config> {
 	try {
-		// In a real implementation, you would fetch this from a server or static file
-		// For now, we'll return a default configuration
-		const defaultConfig: Config = {
-			repositories: [
-				{
-					name: 'example-repo-1',
-					owner: 'octocat',
-					url: 'https://github.com/octocat/example-repo-1',
-					branch: 'main',
-					enabled: true
-				},
-				{
-					name: 'example-repo-2',
-					owner: 'octocat',
-					url: 'https://github.com/octocat/example-repo-2',
-					branch: 'main',
-					enabled: true
-				}
-			],
-			github: {
-				token: '',
-				api_url: 'https://api.github.com'
-			},
-			dashboard: {
-				refresh_interval: 30,
-				max_runs_per_repo: 5,
-				show_statuses: ['success', 'failure', 'in_progress']
+		// Fetch config.yaml from static directory
+		if (typeof window !== 'undefined') {
+			const response = await fetch('/config.yaml?' + Date.now());
+			if (response.ok) {
+				const yamlContent = await response.text();
+				const config = await loadConfigFromYaml(yamlContent);
+				configCache = config;
+				configTimestamp = Date.now();
+				return config;
+			} else {
+				throw new Error(`Failed to fetch config.yaml: ${response.status} ${response.statusText}`);
 			}
-		};
+		}
 
-		return defaultConfig;
+		// Server-side fallback (shouldn't be used in SPA, but good to have)
+		throw new Error('Configuration can only be loaded in browser environment');
 	} catch (error) {
 		console.error('Failed to load configuration:', error);
-		throw new Error('Configuration loading failed');
+		throw new Error('Configuration loading failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
 	}
+}
+
+export function getCachedConfig(): Config | null {
+	return configCache;
+}
+
+export function getConfigTimestamp(): number {
+	return configTimestamp;
 }
 
 export async function loadConfigFromYaml(yamlContent: string): Promise<Config> {

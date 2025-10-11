@@ -104,8 +104,10 @@ tmp/
 temp/
 
 # Configuration files with sensitive data
-# Uncomment if you want to ignore the config file (but keep the example)
-# config.yaml
+# The main config file is in static/config.yaml and should be committed
+# Use these patterns for local overrides with sensitive data:
+static/config.local.yaml
+static/secrets.yaml
 config.local.yaml
 secrets.yaml
 

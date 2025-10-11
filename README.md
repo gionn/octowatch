@@ -33,7 +33,7 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
    ```
 
 3. **Configure repositories**:
-   Edit `config.yaml` to add your repositories:
+   Edit `static/config.yaml` to add your repositories:
    ```yaml
    repositories:
      - name: "your-repo-name"
@@ -55,7 +55,7 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 
 ### Basic Configuration
 
-Edit the `config.yaml` file to customize your monitoring setup:
+Edit the `static/config.yaml` file to customize your monitoring setup:
 
 ```yaml
 # List of repositories to monitor
@@ -91,7 +91,7 @@ For better rate limits and private repository access:
 
 1. Go to GitHub Settings → Developer settings → Personal access tokens
 2. Generate a new token with `repo` and `actions:read` scopes
-3. Add the token to your `config.yaml` or set the `GITHUB_TOKEN` environment variable
+2. Add the token to your `static/config.yaml` or set the `GITHUB_TOKEN` environment variable
 4. **Never commit tokens to your repository!**
 
 ### Environment Variables

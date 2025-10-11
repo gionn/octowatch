@@ -2,16 +2,16 @@
 # List the repositories you want to monitor
 
 repositories:
-  - name: "example-repo-1"
-    owner: "octocat"
-    url: "https://github.com/octocat/example-repo-1"
-    branch: "main"
+  - name: "alfresco-build-tools"
+    owner: "Alfresco"
+    url: "https://github.com/Alfresco/alfresco-build-tools"
+    branch: "master"
     enabled: true
 
-  - name: "example-repo-2"
-    owner: "octocat"
-    url: "https://github.com/octocat/example-repo-2"
-    branch: "main"
+  - name: "acs-deployment"
+    owner: "Alfresco"
+    url: "https://github.com/Alfresco/acs-deployment"
+    branch: "master"
     enabled: true
 
   - name: "my-awesome-project"
