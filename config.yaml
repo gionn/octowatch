@@ -1,0 +1,41 @@
+# GitHub Repository Monitoring Configuration
+# List the repositories you want to monitor
+
+repositories:
+  - name: "example-repo-1"
+    owner: "octocat"
+    url: "https://github.com/octocat/example-repo-1"
+    branch: "main"
+    enabled: true
+
+  - name: "example-repo-2"
+    owner: "octocat"
+    url: "https://github.com/octocat/example-repo-2"
+    branch: "main"
+    enabled: true
+
+  - name: "my-awesome-project"
+    owner: "myusername"
+    url: "https://github.com/myusername/my-awesome-project"
+    branch: "develop"
+    enabled: false
+
+# GitHub API settings
+github:
+  # GitHub Personal Access Token (optional, but recommended for higher rate limits)
+  # You can set this as an environment variable: GITHUB_TOKEN
+  token: ""
+  
+  # API base URL (for GitHub Enterprise, change this)
+  api_url: "https://api.github.com"
+
+# Dashboard settings
+dashboard:
+  # Auto-refresh interval in seconds
+  refresh_interval: 30
+  
+  # Maximum number of workflow runs to display per repository
+  max_runs_per_repo: 5
+  
+  # Show only specific workflow statuses (success, failure, in_progress, cancelled)
+  show_statuses: ["success", "failure", "in_progress"]
