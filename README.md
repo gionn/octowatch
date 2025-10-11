@@ -131,7 +131,6 @@ src/
 │   └── +page.svelte            # Dashboard home page
 ├── lib/
 │   ├── components/             # Reusable UI components
-│   │   ├── RepositoryCard.svelte
 │   │   └── RefreshButton.svelte
 │   ├── services/               # API and business logic
 │   │   ├── github-api.ts       # GitHub API integration

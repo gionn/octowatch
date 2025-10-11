@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import RepositoryCard from '$lib/components/RepositoryCard.svelte';
 	import RefreshButton from '$lib/components/RefreshButton.svelte';
 	import { loadConfig, getCachedConfig } from '$lib/services/config-loader.js';
 	import { GitHubApiClient } from '$lib/services/github-api.js';
+	import { formatDate } from '$lib/utils/date-formatter.js';
 	import type { Repository, WorkflowRun, Config } from '$lib/types/github.js';
 
 	let repositoryStatuses: Array<{
@@ -143,14 +143,98 @@
 			<p>Add repositories to monitor in your <code>config.yaml</code> file.</p>
 		</div>
 	{:else}
-		<div class="repositories">
-			{#each repositoryStatuses as repoStatus}
-				<RepositoryCard
-					repository={repoStatus.repository}
-					workflowRuns={repoStatus.workflowRuns}
-					error={repoStatus.error}
-				/>
-			{/each}
+		<div class="table-container">
+			<table class="workflows-table">
+				<thead>
+					<tr>
+						<th>Repository</th>
+						<th>Branch</th>
+						<th>Status</th>
+						<th>Workflow</th>
+						<th>Last Run</th>
+						<th>Commit</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each repositoryStatuses as repoStatus}
+						{#if repoStatus.error}
+							<tr class="error-row">
+								<td>
+									<a href={repoStatus.repository.url} target="_blank" rel="noopener noreferrer" class="repo-link">
+										{repoStatus.repository.owner}/{repoStatus.repository.name}
+									</a>
+								</td>
+								<td>{repoStatus.repository.branch}</td>
+								<td colspan="5" class="error-cell">
+									<span class="error-message">❌ {repoStatus.error}</span>
+								</td>
+							</tr>
+						{:else if repoStatus.workflowRuns.length === 0}
+							<tr class="no-workflows-row">
+								<td>
+									<a href={repoStatus.repository.url} target="_blank" rel="noopener noreferrer" class="repo-link">
+										{repoStatus.repository.owner}/{repoStatus.repository.name}
+									</a>
+								</td>
+								<td>{repoStatus.repository.branch}</td>
+								<td colspan="5" class="no-workflows-cell">
+									<span class="no-workflows-message">No workflow runs found</span>
+								</td>
+							</tr>
+						{:else}
+							{#each repoStatus.workflowRuns as run, index}
+								<tr class="workflow-row"
+								    class:success={run.status === 'completed' && run.conclusion === 'success'}
+								    class:failure={run.status === 'completed' && run.conclusion === 'failure'}
+								    class:in-progress={run.status === 'in_progress' || run.status === 'queued'}
+								    class:cancelled={run.status === 'completed' && run.conclusion === 'cancelled'}>
+									{#if index === 0}
+										<td rowspan={repoStatus.workflowRuns.length} class="repo-cell">
+											<a href={repoStatus.repository.url} target="_blank" rel="noopener noreferrer" class="repo-link">
+												{repoStatus.repository.owner}/{repoStatus.repository.name}
+											</a>
+										</td>
+										<td rowspan={repoStatus.workflowRuns.length} class="branch-cell">
+											{repoStatus.repository.branch}
+										</td>
+									{/if}
+									<td class="status-cell">
+										<span class="status-badge"
+										      class:success={run.status === 'completed' && run.conclusion === 'success'}
+										      class:failure={run.status === 'completed' && run.conclusion === 'failure'}
+										      class:in-progress={run.status === 'in_progress' || run.status === 'queued'}
+										      class:cancelled={run.status === 'completed' && run.conclusion === 'cancelled'}
+										      class:unknown={run.status === 'completed' && !run.conclusion}>
+											{#if run.status === 'in_progress' || run.status === 'queued'}
+												IN PROGRESS
+											{:else if run.status === 'completed'}
+												{run.conclusion?.toUpperCase() || 'UNKNOWN'}
+											{:else}
+												{run.status.toUpperCase()}
+											{/if}
+										</span>
+									</td>
+									<td class="workflow-cell">
+										{run.name || 'Unknown Workflow'}
+									</td>
+									<td class="time-cell">
+										{formatDate(run.updated_at)}
+									</td>
+									<td class="commit-cell">
+										<span class="commit-sha">{run.head_sha.substring(0, 7)}</span>
+									</td>
+									<td class="actions-cell">
+										<a href={run.html_url} target="_blank" rel="noopener noreferrer" class="view-link">
+											View →
+										</a>
+									</td>
+								</tr>
+							{/each}
+						{/if}
+					{/each}
+				</tbody>
+			</table>
 		</div>
 	{/if}
 </div>
@@ -207,10 +291,155 @@
 		font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 	}
 
-	.repositories {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-		gap: 1.5rem;
+	.table-container {
+		background: white;
+		border-radius: 8px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+		border: 1px solid #e1e4e8;
+	}
+
+	.workflows-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.9rem;
+	}
+
+	.workflows-table th {
+		background-color: #f6f8fa;
+		color: #24292e;
+		font-weight: 600;
+		padding: 0.75rem 1rem;
+		text-align: left;
+		border-bottom: 2px solid #e1e4e8;
+		white-space: nowrap;
+	}
+
+	.workflows-table td {
+		padding: 0.75rem 1rem;
+		border-bottom: 1px solid #e1e4e8;
+		vertical-align: middle;
+	}
+
+	.workflow-row:hover {
+		background-color: #f8f9fa;
+	}
+
+	.workflow-row.success {
+		border-left: 4px solid #28a745;
+	}
+
+	.workflow-row.failure {
+		border-left: 4px solid #d73a49;
+	}
+
+	.workflow-row.in-progress {
+		border-left: 4px solid #ffc107;
+	}
+
+	.workflow-row.cancelled {
+		border-left: 4px solid #6c757d;
+	}
+
+	.error-row, .no-workflows-row {
+		border-left: 4px solid #dc3545;
+	}
+
+	.repo-cell, .branch-cell {
+		background-color: #f8f9fa;
+		font-weight: 500;
+		color: #24292e;
+	}
+
+	.repo-link {
+		color: #0366d6;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.repo-link:hover {
+		text-decoration: underline;
+	}
+
+	.status-badge {
+		padding: 0.25rem 0.75rem;
+		border-radius: 4px;
+		font-size: 0.75rem;
+		font-weight: bold;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.status-badge.success {
+		background-color: #dcffe4;
+		color: #28a745;
+	}
+
+	.status-badge.failure {
+		background-color: #ffeef0;
+		color: #d73a49;
+	}
+
+	.status-badge.in-progress {
+		background-color: #fff3cd;
+		color: #856404;
+	}
+
+	.status-badge.cancelled {
+		background-color: #f8f9fa;
+		color: #6c757d;
+	}
+
+	.status-badge.unknown {
+		background-color: #e9ecef;
+		color: #495057;
+	}
+
+	.commit-sha {
+		font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+		background-color: #f6f8fa;
+		padding: 0.2rem 0.4rem;
+		border-radius: 3px;
+		font-size: 0.8rem;
+		color: #586069;
+	}
+
+	.view-link {
+		color: #0366d6;
+		text-decoration: none;
+		font-size: 0.85rem;
+		font-weight: 500;
+	}
+
+	.view-link:hover {
+		text-decoration: underline;
+	}
+
+	.error-cell, .no-workflows-cell {
+		text-align: center;
+		font-style: italic;
+		color: #6c757d;
+	}
+
+	.error-message {
+		color: #d73a49;
+		font-weight: 500;
+	}
+
+	.no-workflows-message {
+		color: #6c757d;
+	}
+
+	.time-cell {
+		color: #586069;
+		white-space: nowrap;
+	}
+
+	.workflow-cell {
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.controls {
@@ -244,16 +473,34 @@
 		to { transform: rotate(360deg); }
 	}
 
+	@media (max-width: 1024px) {
+		.table-container {
+			overflow-x: auto;
+		}
+
+		.workflows-table {
+			min-width: 800px;
+		}
+	}
+
 	@media (max-width: 768px) {
-		.repositories {
-			grid-template-columns: 1fr;
-			gap: 1rem;
+		.workflows-table th,
+		.workflows-table td {
+			padding: 0.5rem;
+		}
+
+		.workflows-table {
+			font-size: 0.8rem;
 		}
 
 		.auto-refresh-info {
 			flex-direction: column;
 			text-align: center;
 			gap: 0.25rem;
+		}
+
+		.workflow-cell {
+			max-width: 150px;
 		}
 	}
 </style>
