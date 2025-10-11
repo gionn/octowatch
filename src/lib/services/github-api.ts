@@ -24,7 +24,7 @@ export class GitHubApiClient {
 
 	private async makeRequest<T>(endpoint: string): Promise<T> {
 		const url = `${this.apiUrl}${endpoint}`;
-		
+
 		try {
 			const response = await fetch(url, {
 				method: 'GET',
@@ -58,7 +58,7 @@ export class GitHubApiClient {
 
 	async getWorkflowRuns(owner: string, repo: string, branch?: string, limit: number = 5): Promise<WorkflowRun[]> {
 		let endpoint = `/repos/${owner}/${repo}/actions/runs?per_page=${limit}`;
-		
+
 		if (branch) {
 			endpoint += `&branch=${encodeURIComponent(branch)}`;
 		}
@@ -99,10 +99,10 @@ export class GitHubApiClient {
 		error?: string;
 	}>> {
 		const enabledRepositories = repositories.filter(repo => repo.enabled);
-		
+
 		// Process repositories in parallel, but with some throttling
 		const promises = enabledRepositories.map(repo => this.getRepositoryStatus(repo));
-		
+
 		return Promise.all(promises);
 	}
 }

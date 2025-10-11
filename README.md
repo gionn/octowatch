@@ -65,7 +65,7 @@ repositories:
     url: "https://github.com/mycompany/my-awesome-app"
     branch: "main"
     enabled: true
-  
+
   - name: "api-service"
     owner: "mycompany"
     url: "https://github.com/mycompany/api-service"

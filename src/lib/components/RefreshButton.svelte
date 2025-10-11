@@ -14,16 +14,16 @@
 </script>
 
 <div class="refresh-container">
-	<button 
-		class="refresh-button" 
-		on:click={handleRefresh} 
+	<button
+		class="refresh-button"
+		on:click={handleRefresh}
 		disabled={loading}
 		title="Refresh all repositories"
 	>
 		<span class="refresh-icon" class:spinning={loading}>↻</span>
 		{loading ? 'Refreshing...' : 'Refresh'}
 	</button>
-	
+
 	{#if lastUpdatedText}
 		<span class="last-updated">{lastUpdatedText}</span>
 	{/if}

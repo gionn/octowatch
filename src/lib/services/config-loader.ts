@@ -40,7 +40,7 @@ export function getConfigTimestamp(): number {
 export async function loadConfigFromYaml(yamlContent: string): Promise<Config> {
 	try {
 		const config = yaml.load(yamlContent) as Config;
-		
+
 		// Validate required fields
 		if (!config.repositories || !Array.isArray(config.repositories)) {
 			throw new Error('Invalid configuration: repositories must be an array');

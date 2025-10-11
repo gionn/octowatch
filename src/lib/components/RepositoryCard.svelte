@@ -11,12 +11,12 @@
 	$: lastRun = workflowStatus.lastRun;
 </script>
 
-<div class="repo-card" class:success={workflowStatus.status === 'success'} 
+<div class="repo-card" class:success={workflowStatus.status === 'success'}
      class:failure={workflowStatus.status === 'failure'}
      class:in-progress={workflowStatus.status === 'in_progress'}
      class:cancelled={workflowStatus.status === 'cancelled'}
      class:error-state={error}>
-	
+
 	<div class="repo-header">
 		<h3>
 			<a href={repository.url} target="_blank" rel="noopener noreferrer">
@@ -26,7 +26,7 @@
 		{#if error}
 			<div class="error-badge">Error</div>
 		{:else}
-			<div class="status-badge" class:success={workflowStatus.status === 'success'} 
+			<div class="status-badge" class:success={workflowStatus.status === 'success'}
 			     class:failure={workflowStatus.status === 'failure'}
 			     class:in-progress={workflowStatus.status === 'in_progress'}
 			     class:cancelled={workflowStatus.status === 'cancelled'}
@@ -46,25 +46,25 @@
 				<span class="label">Branch:</span>
 				<span class="value">{repository.branch}</span>
 			</div>
-			
+
 			{#if lastRun}
 				<div class="detail-row">
 					<span class="label">Last Run:</span>
 					<span class="value">{formatDate(lastRun.updated_at)}</span>
 				</div>
-				
+
 				{#if lastRun.name}
 					<div class="detail-row">
 						<span class="label">Workflow:</span>
 						<span class="value">{lastRun.name}</span>
 					</div>
 				{/if}
-				
+
 				<div class="detail-row">
 					<span class="label">Commit:</span>
 					<span class="value commit-sha">{lastRun.head_sha.substring(0, 7)}</span>
 				</div>
-				
+
 				<div class="actions">
 					<a href={lastRun.html_url} target="_blank" rel="noopener noreferrer" class="view-link">
 						View Run →

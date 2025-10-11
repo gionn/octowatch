@@ -5,7 +5,7 @@
 	import { loadConfig, getCachedConfig } from '$lib/services/config-loader.js';
 	import { GitHubApiClient } from '$lib/services/github-api.js';
 	import type { Repository, WorkflowRun, Config } from '$lib/types/github.js';
-	
+
 	let repositoryStatuses: Array<{
 		repository: Repository;
 		workflowRuns: WorkflowRun[];
@@ -23,7 +23,7 @@
 		try {
 			loading = true;
 			error = '';
-			
+
 			// Load config (fresh or from cache)
 			if (forceReloadConfig || !config) {
 				config = await loadConfig();
@@ -31,9 +31,9 @@
 			} else {
 				config = getCachedConfig() || await loadConfig();
 			}
-			
+
 			apiClient = new GitHubApiClient(config.github.api_url, config.github.token);
-			
+
 			repositoryStatuses = await apiClient.getAllRepositoryStatuses(config.repositories);
 			lastUpdated = new Date();
 			loading = false;
@@ -69,11 +69,11 @@
 						const yamlContent = await response.text();
 						const { loadConfigFromYaml } = await import('$lib/services/config-loader.js');
 						const newConfig = await loadConfigFromYaml(yamlContent);
-						
+
 						// Simple comparison - reload if config appears different
 						const currentConfigString = JSON.stringify(config);
 						const newConfigString = JSON.stringify(newConfig);
-						
+
 						if (currentConfigString !== newConfigString) {
 							console.log('🔄 Config file changed, reloading...');
 							await loadRepositories(true);
@@ -116,12 +116,12 @@
 	</header>
 
 	<div class="controls">
-		<RefreshButton 
-			{loading} 
-			{lastUpdated} 
-			on:refresh={handleRefresh} 
+		<RefreshButton
+			{loading}
+			{lastUpdated}
+			on:refresh={handleRefresh}
 		/>
-		
+
 		{#if config?.dashboard?.refresh_interval}
 			<div class="auto-refresh-info">
 				<span class="auto-refresh-indicator">🔄</span>
@@ -145,7 +145,7 @@
 	{:else}
 		<div class="repositories">
 			{#each repositoryStatuses as repoStatus}
-				<RepositoryCard 
+				<RepositoryCard
 					repository={repoStatus.repository}
 					workflowRuns={repoStatus.workflowRuns}
 					error={repoStatus.error}
@@ -249,7 +249,7 @@
 			grid-template-columns: 1fr;
 			gap: 1rem;
 		}
-		
+
 		.auto-refresh-info {
 			flex-direction: column;
 			text-align: center;
