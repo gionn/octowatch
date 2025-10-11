@@ -43,12 +43,13 @@ github-repository-monitoring/
 
 ## Features
 
-### Core Features (MVP)
-1. **Repository Grid View**: Display monitored repositories in a responsive card layout
-2. **Workflow Status Indicators**: Show current status of latest workflow runs
-3. **Configuration Management**: YAML-based repository configuration
-4. **Basic Error Handling**: Display connection and API errors
-5. **Responsive Design**: Works on desktop and mobile devices
+### Core Features (Implemented)
+1. **Collapsible Table View**: Display repositories with expandable workflow details
+2. **Cumulative Status Aggregation**: Smart status rollup showing worst-case per repository
+3. **Real-time Auto-refresh**: Configurable intervals with config file watching
+4. **Configuration Management**: YAML-based repository configuration with hot-reload
+5. **Responsive Design**: Table layout with horizontal scroll on mobile devices
+6. **Error Handling**: Comprehensive error display and graceful degradation
 
 ### Enhanced Features (Future)
 1. **Real-time Updates**: Auto-refresh workflow statuses
@@ -59,38 +60,53 @@ github-repository-monitoring/
 6. **GitHub Authentication**: Personal access token integration
 7. **Multiple Branch Support**: Monitor different branches per repository
 
-## Component Design
+## Architecture Design
 
-### RepositoryCard Component
+### Single-Page Table Layout
+
+The dashboard uses a **unified table approach** with collapsible functionality:
+
+**Main Component**: `src/routes/+page.svelte`
+- Complete dashboard logic in single file
+- Repository summary rows (collapsed by default)
+- Expandable workflow detail rows
+- Real-time updates and configuration watching
+
+**Supporting Components**:
+- `RefreshButton.svelte` - Manual refresh with last updated display
+- Configuration and API services in `src/lib/services/`
+
+### Collapsible Repository View
+
+**Repository Summary Row**:
 ```typescript
-interface RepositoryCardProps {
+interface RepositorySummary {
   repository: Repository;
-  workflowRuns: WorkflowRun[];
-  lastUpdated: Date;
+  cumulativeStatus: 'success' | 'failure' | 'in_progress' | 'cancelled' | 'unknown';
+  statusText: string; // e.g., "2 failed, 3 passed"
+  runCount: number;
+  lastActivity: Date;
+  isExpanded: boolean;
 }
 ```
 
-**Features**:
-- Repository name and owner
-- Current workflow status badge
-- Last run timestamp
-- Branch information
-- Quick actions (refresh, view details)
-
-### WorkflowStatus Component
+**Workflow Detail Row** (shown when expanded):
 ```typescript
-interface WorkflowStatusProps {
-  status: 'success' | 'failure' | 'in_progress' | 'cancelled' | 'queued';
-  conclusion?: string;
-  createdAt: Date;
+interface WorkflowDetail {
+  workflowRun: WorkflowRun;
+  indentLevel: number;
+  parentRepository: Repository;
 }
 ```
 
-**Features**:
-- Color-coded status indicators
-- Status text and icons
-- Timestamp display
-- Loading states
+### Status Aggregation Logic
+
+**Cumulative Status Priority**:
+1. **Failure** (highest) - Any workflow failed
+2. **In Progress** - Workflows running (if no failures)
+3. **Success** - All workflows passed
+4. **Cancelled** - All workflows cancelled
+5. **Unknown** (lowest) - Indeterminate state
 
 ## Data Models
 
@@ -175,42 +191,48 @@ interface Repository {
 
 ### Layout
 - **Header**: Application title and description
-- **Grid Layout**: Responsive card grid (min 300px per card)
-- **Card Design**: Clean, minimal with clear status indicators
-- **Loading States**: Skeleton loading for better UX
+- **Controls**: Refresh button with auto-refresh status indicator
+- **Table Layout**: Collapsible table with repository summary rows
+- **Expandable Details**: Click to reveal individual workflow runs
+- **Loading States**: Progressive loading with existing data preserved
 - **Empty States**: Helpful messages when no data available
 
-### Responsive Breakpoints
-- **Mobile**: < 768px (single column)
-- **Tablet**: 768px - 1024px (2 columns)
-- **Desktop**: > 1024px (3+ columns)
+### Responsive Design
+- **Desktop**: Full table with all columns visible
+- **Tablet/Mobile**: Horizontal scroll with minimum table width
+- **Touch-friendly**: Large click targets for expand/collapse buttons
+- **Compact**: Reduced padding and font sizes on smaller screens
 
 ## Development Phases
 
-### Phase 1: Foundation (Current)
-- [x] SvelteKit project setup
-- [x] Basic dashboard layout
-- [x] Mock data display
-- [x] YAML configuration structure
-- [ ] Configuration loader implementation
+### Phase 1: Foundation ✅ **COMPLETED**
+- [x] SvelteKit project setup with TypeScript
+- [x] Collapsible table layout implementation
+- [x] Real GitHub API integration
+- [x] YAML configuration with hot-reload
+- [x] Cumulative status aggregation logic
 
-### Phase 2: GitHub Integration
-- [ ] GitHub API client
-- [ ] Real workflow data fetching
-- [ ] Error handling implementation
-- [ ] Loading states
+### Phase 2: Core Features ✅ **COMPLETED**
+- [x] GitHub API client with error handling
+- [x] Real workflow data fetching and display
+- [x] Auto-refresh functionality with configurable intervals
+- [x] Configuration file watching and auto-reload
+- [x] Responsive design with mobile support
 
-### Phase 3: Enhanced UX
-- [ ] Auto-refresh functionality
-- [ ] Detailed workflow views
-- [ ] Filtering and sorting
-- [ ] Performance optimizations
+### Phase 3: Enhanced UX ✅ **COMPLETED**
+- [x] Collapsible repository view
+- [x] Smart status priority aggregation
+- [x] Loading states with existing data preservation
+- [x] Comprehensive error handling and display
+- [x] Real-time config changes without restart
 
-### Phase 4: Advanced Features
-- [ ] GitHub authentication
-- [ ] Historical data storage
-- [ ] Notifications system
-- [ ] Settings page
+### Phase 4: Future Enhancements
+- [ ] Multi-branch monitoring per repository
+- [ ] Workflow run history and trends
+- [ ] Browser notifications for status changes
+- [ ] GitHub authentication for private repos
+- [ ] Filtering and sorting capabilities
+- [ ] Custom dashboard themes
 
 ## Configuration Examples
 
@@ -265,6 +287,35 @@ repositories:
 7. **Export Functionality**: Export status reports to PDF/CSV
 8. **Webhook Integration**: Real-time updates via GitHub webhooks
 
+## Current Implementation Status
+
+### ✅ **Fully Implemented Features**
+
+1. **Collapsible Table Interface**: Single-page dashboard with expandable repository rows
+2. **Smart Status Aggregation**: Failure > In Progress > Success priority system
+3. **Real-time Updates**: Configurable auto-refresh (default 30s) + config file watching (5s)
+4. **GitHub API Integration**: Full workflow run fetching with comprehensive error handling
+5. **Configuration Management**: `static/config.yaml` with hot-reload capability
+6. **Responsive Design**: Mobile-friendly with horizontal scroll and touch-optimized controls
+7. **Error Handling**: Network errors, API rate limits, repository access issues
+8. **TypeScript**: Full type safety across the application
+
+### 🎯 **Key Architectural Decisions**
+
+- **Single Page Application**: All logic in `src/routes/+page.svelte` for simplicity
+- **Static Configuration**: Config in `static/config.yaml` served by SvelteKit automatically
+- **No Backend Required**: Pure frontend solution using GitHub's public API
+- **Progressive Enhancement**: Works without JavaScript for basic HTML table
+- **Minimal Dependencies**: Only essential packages (SvelteKit, TypeScript, js-yaml)
+
+### 📊 **Performance Characteristics**
+
+- **Initial Load**: ~1-2s for 5-10 repositories
+- **Auto-refresh**: Background updates without UI blocking
+- **Config Changes**: 5-second detection cycle for development
+- **Memory Usage**: Minimal state management, efficient re-rendering
+- **Bundle Size**: Optimized for fast loading with SvelteKit
+
 ---
 
-*This design document is a living document and will be updated as the project evolves.*
+*This design document reflects the current implementation as of October 2025.*

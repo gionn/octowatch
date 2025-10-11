@@ -5,11 +5,13 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 ## Features
 
 - 🔍 **Multi-Repository Monitoring**: Track GitHub Actions workflows across multiple repositories
-- 📊 **Real-time Status Updates**: See current workflow statuses with automatic refresh
-- 🎨 **Clean UI**: Modern, responsive dashboard with status-color coding
-- ⚙️ **YAML Configuration**: Simple configuration management via `config.yaml`
+- 📊 **Collapsible Table View**: Compact repository summary with expandable workflow details
+- 🎯 **Cumulative Status**: Smart status aggregation showing worst-case status per repository
+- 📈 **Real-time Updates**: Automatic refresh with configurable intervals and config file watching
+- 🎨 **Clean UI**: Modern, responsive table layout with color-coded status indicators
+- ⚙️ **YAML Configuration**: Simple configuration management via `static/config.yaml`
 - 🚀 **Fast Performance**: Built with SvelteKit and Vite for optimal performance
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices with horizontal scroll
 
 ## Quick Start
 
@@ -144,15 +146,37 @@ src/
 └── app.d.ts                   # TypeScript declarations
 ```
 
-## Workflow Status Colors
+## Dashboard Layout
 
-The dashboard uses color coding to quickly identify workflow statuses:
+### Collapsible Repository View
 
-- 🟢 **Green**: Success - All workflows passed
-- 🔴 **Red**: Failure - One or more workflows failed
-- 🟡 **Yellow**: In Progress - Workflows currently running
-- ⚫ **Gray**: Cancelled - Workflows were cancelled
-- 🔵 **Blue**: Unknown - Status couldn't be determined
+The dashboard displays repositories in a **collapsible table format**:
+
+**📋 Repository Summary (Collapsed by default):**
+- **▶/▼ Toggle**: Click to expand/collapse workflow details
+- **Repository Name**: Clickable link to GitHub repository
+- **Branch**: Monitored branch name
+- **Cumulative Status**: Aggregated status across all workflows
+- **Workflow Summary**: Count of passed/failed/running workflows
+- **Last Activity**: Most recent workflow run timestamp
+- **View All**: Link to repository's GitHub Actions page
+
+**🔍 Expanded Details (Click to show):**
+- Individual workflow runs with full information
+- Workflow name, specific status, commit SHA, timing
+- Direct links to individual workflow run pages
+
+### Status Colors & Priority
+
+The dashboard uses color coding with **smart status aggregation**:
+
+- 🔴 **Red (Failure)**: At least one workflow failed (highest priority)
+- 🟡 **Yellow (In Progress)**: Workflows currently running (if no failures)
+- 🟢 **Green (Success)**: All workflows passed successfully
+- ⚫ **Gray (Cancelled)**: Workflows were cancelled
+- 🔵 **Blue (Unknown)**: Status couldn't be determined
+
+**Status Priority**: Failure > In Progress > Success > Cancelled > Unknown
 
 ## Troubleshooting
 
@@ -181,12 +205,22 @@ The dashboard uses color coding to quickly identify workflow statuses:
 
 ## Development
 
+### Current Architecture
+
+The dashboard uses a **single-page table layout** with collapsible rows:
+
+- **Main View**: `src/routes/+page.svelte` - Contains the entire dashboard logic
+- **Components**: `src/lib/components/RefreshButton.svelte` - Manual refresh functionality
+- **Services**: GitHub API integration and configuration loading
+- **Real-time Features**: Auto-refresh and config file watching
+
 ### Adding New Features
 
-1. **Components**: Add reusable UI components in `src/lib/components/`
-2. **Services**: Add business logic in `src/lib/services/`
-3. **Types**: Define TypeScript interfaces in `src/lib/types/`
-4. **Utilities**: Add helper functions in `src/lib/utils/`
+1. **UI Updates**: Modify the main table in `src/routes/+page.svelte`
+2. **API Integration**: Extend services in `src/lib/services/`
+3. **Configuration**: Add new options to `static/config.yaml`
+4. **Types**: Define TypeScript interfaces in `src/lib/types/`
+5. **Utilities**: Add helper functions in `src/lib/utils/`
 
 ### Building for Production
 
