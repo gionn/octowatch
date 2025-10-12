@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import RefreshButton from '$lib/components/RefreshButton.svelte';
+	import HeaderActions from '$lib/components/HeaderActions.svelte';
 	import { loadConfig, getCachedConfig, getRepositoryGroupBySlug } from '$lib/services/config-loader.js';
 	import { GitHubApiClient } from '$lib/services/github-api.js';
 	import { TokenStorage } from '$lib/services/token-storage.js';
@@ -25,13 +25,6 @@
 	// Track which repositories are expanded
 	let expandedRepos = new Set<string>();
 
-	// Token settings popup state
-	let showTokenPopup = false;
-	let tokenInput = '';
-	let tokenStatus = '';
-	let hasToken = false;
-	let ignoreDependabot = false;
-
 	// Get the slug from the URL
 	$: slug = $page.params.slug;
 
@@ -48,53 +41,7 @@
 		return `${repo.owner}/${repo.name}`;
 	}
 
-	function openTokenPopup() {
-		tokenInput = TokenStorage.getToken() || '';
-		ignoreDependabot = TokenStorage.getIgnoreDependabot();
-		tokenStatus = '';
-		showTokenPopup = true;
-	}
 
-	function closeTokenPopup() {
-		showTokenPopup = false;
-		tokenInput = '';
-		tokenStatus = '';
-	}
-
-	function saveToken() {
-		// Save Dependabot setting
-		TokenStorage.setIgnoreDependabot(ignoreDependabot);
-
-		if (!tokenInput.trim()) {
-			TokenStorage.removeToken();
-			hasToken = false;
-			tokenStatus = 'Settings saved successfully';
-		} else if (TokenStorage.isValidTokenFormat(tokenInput)) {
-			TokenStorage.setToken(tokenInput);
-			hasToken = true;
-			tokenStatus = 'Settings saved successfully';
-
-			// Update the API client with the new token
-			if (apiClient) {
-				apiClient.updateToken(tokenInput.trim());
-			}
-		} else {
-			tokenStatus = 'Invalid token format. Please check your GitHub token.';
-			return;
-		}
-
-		// Auto-close popup after successful save
-		if (!tokenStatus.includes('Invalid')) {
-			setTimeout(() => {
-				closeTokenPopup();
-			}, 1500);
-		}
-	}
-
-	function loadTokenFromStorage() {
-		hasToken = TokenStorage.hasToken();
-		ignoreDependabot = TokenStorage.getIgnoreDependabot();
-	}
 
 	function getCumulativeStatus(workflowRuns: WorkflowRun[]): {
 		status: 'success' | 'failure' | 'in_progress' | 'cancelled' | 'unknown';
@@ -199,6 +146,14 @@
 		}
 	}
 
+	function handleTokenUpdated() {
+		// Update the API client with the new token when token is updated
+		if (apiClient && config) {
+			const token = TokenStorage.getToken();
+			apiClient.updateToken(token || undefined);
+		}
+	}
+
 	function setupAutoRefresh() {
 		// Clear existing interval
 		if (autoRefreshInterval) {
@@ -247,7 +202,6 @@
 	}
 
 	onMount(() => {
-		loadTokenFromStorage();
 		loadRepositories(true);
 		setupConfigWatcher();
 	});
@@ -276,24 +230,14 @@
 				<h1>{currentGroup?.name || 'Repository Group'}</h1>
 				<p>{currentGroup?.description || 'Monitor GitHub Actions workflows for this group'}</p>
 			</div>
-			<div class="header-actions">
-				<button class="settings-btn" on:click={openTokenPopup} title="Settings">
-					<svg class="gear-icon" viewBox="0 0 24 24" fill="currentColor">
-						<path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.5,12.65 19.5,12.32 19.5,12C19.5,11.68 19.5,11.35 19.43,11.03L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.65 15.48,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.52,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11.03C4.5,11.35 4.5,11.68 4.5,12C4.5,12.32 4.5,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.52,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.48,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
-					</svg>
-					<span class="token-indicator" class:has-token={hasToken}></span>
-				</button>
-			</div>
+			<HeaderActions
+				{loading}
+				refreshTitle="Refresh Repositories"
+				on:refresh={handleRefresh}
+				on:tokenUpdated={handleTokenUpdated}
+			/>
 		</div>
 	</header>
-
-	<div class="controls">
-		<RefreshButton
-			{loading}
-			{lastUpdated}
-			on:refresh={handleRefresh}
-		/>
-	</div>
 
 	{#if loading && repositoryStatuses.length === 0}
 		<div class="loading">Loading repositories...</div>
@@ -459,62 +403,7 @@
 	{/if}
 </div>
 
-<!-- Token Settings Popup -->
-{#if showTokenPopup}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-	<div
-		class="popup-overlay"
-		on:click={closeTokenPopup}
-		on:keydown={(e) => e.key === 'Escape' && closeTokenPopup()}
-	>
-		<div class="popup-content" on:click|stopPropagation>
-			<div class="popup-header">
-				<h3>Settings</h3>
-				<button class="close-btn" on:click={closeTokenPopup}>×</button>
-			</div>
 
-			<div class="popup-body">
-				<div class="form-group">
-					<label for="github-token">GitHub Personal Access Token (optional)</label>
-					<input
-						id="github-token"
-						type="password"
-						bind:value={tokenInput}
-						placeholder="Enter your GitHub token for higher API rate limits"
-					/>
-					<small>
-						Tokens starting with 'ghp_', 'gho_', 'ghu_', 'ghs_', 'ghr_', or 'github_pat_' are supported.
-						<br>
-						Leave empty to use anonymous access (lower rate limits).
-					</small>
-				</div>
-
-				<div class="form-group">
-					<label>
-						<input type="checkbox" bind:checked={ignoreDependabot} />
-						Ignore Dependabot workflows
-					</label>
-					<small>
-						Hide workflow runs initiated by Dependabot to reduce noise.
-					</small>
-				</div>
-
-				{#if tokenStatus}
-					<div class="status-message" class:error={tokenStatus.includes('Invalid')}>
-						{tokenStatus}
-					</div>
-				{/if}
-			</div>
-
-			<div class="popup-footer">
-				<button class="cancel-btn" on:click={closeTokenPopup}>Cancel</button>
-				<button class="save-btn" on:click={saveToken}>Save Settings</button>
-			</div>
-		</div>
-	</div>
-{/if}
 
 <style>
 	.dashboard {
@@ -565,48 +454,7 @@
 		margin: 0.5rem 0 0 0;
 	}
 
-	.header-actions {
-		display: flex;
-		align-items: center;
-	}
 
-	.settings-btn {
-		position: relative;
-		background: none;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-		color: #666;
-		padding: 8px;
-	}
-
-	.settings-btn:hover {
-		color: #007cba;
-		transform: rotate(90deg) scale(1.1);
-	}
-
-	.gear-icon {
-		width: 32px;
-		height: 32px;
-	}
-
-	.token-indicator {
-		position: absolute;
-		top: 2px;
-		right: 2px;
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		background-color: #dc3545;
-		border: 2px solid white;
-	}
-
-	.token-indicator.has-token {
-		background-color: #28a745;
-	}
 
 	.loading, .error, .empty-state {
 		text-align: center;
@@ -639,9 +487,7 @@
 		font-size: 0.9rem;
 	}
 
-	.controls {
-		margin-bottom: 1rem;
-	}
+
 
 	.table-container {
 		background: white;
@@ -869,154 +715,6 @@
 		background-color: transparent;
 	}
 
-	/* Popup Styles */
-	.popup-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.5);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		z-index: 1000;
-	}
-
-	.popup-content {
-		background: white;
-		border-radius: 8px;
-		width: 90%;
-		max-width: 500px;
-		max-height: 90vh;
-		overflow-y: auto;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-	}
-
-	.popup-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1.5rem;
-		border-bottom: 1px solid #e9ecef;
-	}
-
-	.popup-header h3 {
-		margin: 0;
-		color: #333;
-	}
-
-	.close-btn {
-		background: none;
-		border: none;
-		font-size: 1.5rem;
-		cursor: pointer;
-		color: #666;
-		width: 32px;
-		height: 32px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 4px;
-	}
-
-	.close-btn:hover {
-		background-color: #f8f9fa;
-		color: #333;
-	}
-
-	.popup-body {
-		padding: 1.5rem;
-	}
-
-	.form-group {
-		margin-bottom: 1.5rem;
-	}
-
-	.form-group label {
-		display: block;
-		margin-bottom: 0.5rem;
-		font-weight: 500;
-		color: #333;
-	}
-
-	.form-group input[type="password"] {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		font-size: 1rem;
-		box-sizing: border-box;
-	}
-
-	.form-group input[type="password"]:focus {
-		outline: none;
-		border-color: #007cba;
-		box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.2);
-	}
-
-	.form-group input[type="checkbox"] {
-		margin-right: 0.5rem;
-	}
-
-	.form-group small {
-		color: #666;
-		font-size: 0.85rem;
-		line-height: 1.4;
-		display: block;
-		margin-top: 0.5rem;
-	}
-
-	.status-message {
-		padding: 0.75rem;
-		border-radius: 4px;
-		font-size: 0.9rem;
-		background-color: #d4edda;
-		color: #155724;
-		border: 1px solid #c3e6cb;
-	}
-
-	.status-message.error {
-		background-color: #f8d7da;
-		color: #721c24;
-		border-color: #f5c6cb;
-	}
-
-	.popup-footer {
-		padding: 1.5rem;
-		border-top: 1px solid #e9ecef;
-		display: flex;
-		justify-content: flex-end;
-		gap: 1rem;
-	}
-
-	.cancel-btn, .save-btn {
-		padding: 0.75rem 1.5rem;
-		border: none;
-		border-radius: 4px;
-		font-size: 1rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.cancel-btn {
-		background-color: #6c757d;
-		color: white;
-	}
-
-	.cancel-btn:hover {
-		background-color: #5a6268;
-	}
-
-	.save-btn {
-		background-color: #007cba;
-		color: white;
-	}
-
-	.save-btn:hover {
-		background-color: #005a8b;
-	}
-
 	@keyframes spin {
 		from { transform: rotate(0deg); }
 		to { transform: rotate(360deg); }
@@ -1040,25 +738,6 @@
 
 		.workflows-table {
 			font-size: 0.8rem;
-		}
-
-		.popup-content {
-			width: 95%;
-			margin: 1rem;
-		}
-
-		.popup-header,
-		.popup-body,
-		.popup-footer {
-			padding: 1rem;
-		}
-
-		.popup-footer {
-			flex-direction: column;
-		}
-
-		.cancel-btn, .save-btn {
-			width: 100%;
 		}
 	}
 </style>
