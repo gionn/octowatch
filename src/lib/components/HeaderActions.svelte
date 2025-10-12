@@ -102,6 +102,7 @@
 		role="dialog"
 		aria-labelledby="token-popup-title"
 		aria-modal="true"
+		tabindex="-1"
 	>
 		<div class="popup-content" on:click|stopPropagation>
 			<div class="popup-header">
