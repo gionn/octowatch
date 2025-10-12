@@ -1,8 +1,9 @@
 /**
- * Service for managing GitHub token storage in browser localStorage
+ * Service for managing GitHub token storage and user settings in browser localStorage
  */
 
 const GITHUB_TOKEN_KEY = 'github_token';
+const IGNORE_DEPENDABOT_KEY = 'ignore_dependabot_workflows';
 
 export class TokenStorage {
 	/**
@@ -76,5 +77,37 @@ export class TokenStorage {
 			/^ghu_[a-zA-Z0-9]{36}$/.test(trimmed) || // User-to-server token
 			/^ghs_[a-zA-Z0-9]{36}$/.test(trimmed)    // Server-to-server token
 		);
+	}
+
+	/**
+	 * Get the ignore Dependabot workflows setting
+	 */
+	static getIgnoreDependabot(): boolean {
+		if (typeof window === 'undefined') {
+			return false; // SSR safety
+		}
+
+		try {
+			const value = localStorage.getItem(IGNORE_DEPENDABOT_KEY);
+			return value === 'true';
+		} catch (error) {
+			console.error('Failed to get ignore Dependabot setting from localStorage:', error);
+			return false;
+		}
+	}
+
+	/**
+	 * Set the ignore Dependabot workflows setting
+	 */
+	static setIgnoreDependabot(ignore: boolean): void {
+		if (typeof window === 'undefined') {
+			return; // SSR safety
+		}
+
+		try {
+			localStorage.setItem(IGNORE_DEPENDABOT_KEY, ignore.toString());
+		} catch (error) {
+			console.error('Failed to store ignore Dependabot setting in localStorage:', error);
+		}
 	}
 }

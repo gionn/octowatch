@@ -10,6 +10,8 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 - 📈 **Real-time Updates**: Automatic refresh with configurable intervals and config file watching
 - 🎨 **Clean UI**: Modern, responsive table layout with color-coded status indicators
 - ⚙️ **YAML Configuration**: Simple configuration management via `static/config.yaml`
+- 🤖 **Dependabot Filtering**: Option to hide Dependabot-triggered workflows from the dashboard
+- 🔐 **Token Management**: Secure GitHub token storage with validation and rate limit improvements
 - 🚀 **Fast Performance**: Built with SvelteKit and Vite for optimal performance
 - 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices with horizontal scroll
 
@@ -93,8 +95,17 @@ For better rate limits and private repository access:
 
 1. Go to GitHub Settings → Developer settings → Personal access tokens
 2. Generate a new token with `repo` and `actions:read` scopes
-2. Add the token to your `static/config.yaml` or set the `GITHUB_TOKEN` environment variable
-4. **Never commit tokens to your repository!**
+3. Click the gear icon in the dashboard to open Settings
+4. Enter your token and configure other preferences (like Dependabot filtering)
+5. **Never commit tokens to your repository!**
+
+### Settings & Preferences
+
+The dashboard includes a settings panel (gear icon) where you can:
+
+- **GitHub Token**: Enter your personal access token for higher rate limits
+- **Dependabot Filtering**: Choose to hide workflows triggered by Dependabot
+- Settings are automatically saved to localStorage and persist across sessions
 
 ### Environment Variables
 
@@ -136,7 +147,8 @@ src/
 │   │   └── RefreshButton.svelte
 │   ├── services/               # API and business logic
 │   │   ├── github-api.ts       # GitHub API integration
-│   │   └── config-loader.ts    # Configuration management
+│   │   ├── config-loader.ts    # Configuration management
+│   │   └── token-storage.ts    # Token and settings storage
 │   ├── types/                  # TypeScript definitions
 │   │   └── github.ts
 │   └── utils/                  # Utility functions
@@ -196,6 +208,11 @@ The dashboard uses color coding with **smart status aggregation**:
 - Validate your YAML syntax
 - Ensure all required fields are present
 - Check the browser console for detailed error messages
+
+**Dependabot workflows still showing**:
+- Open Settings (gear icon) and enable "Ignore Dependabot workflows"
+- Settings are saved automatically and take effect immediately
+- This filters workflows where the actor is "dependabot[bot]"
 
 ### API Rate Limits
 

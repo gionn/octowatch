@@ -28,6 +28,9 @@ export interface WorkflowRun {
 	html_url: string;
 	head_branch: string;
 	head_sha: string;
+	actor: {
+		login: string;
+	};
 }
 
 export interface GitHubRepository {

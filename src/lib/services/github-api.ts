@@ -74,7 +74,7 @@ export class GitHubApiClient {
 		return response.workflow_runs;
 	}
 
-	private deduplicateWorkflowRuns(workflowRuns: WorkflowRun[]): WorkflowRun[] {
+	private deduplicateWorkflowRuns(workflowRuns: WorkflowRun[], ignoreDependabot: boolean = false): WorkflowRun[] {
 		const workflowMap = new Map<string, WorkflowRun>();
 
 		// Sort by updated_at to ensure we process most recent first
@@ -82,8 +82,13 @@ export class GitHubApiClient {
 			new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
 		);
 
-		// Keep only the most recent run for each workflow name
+		// Filter and keep only the most recent run for each workflow name
 		for (const run of sortedRuns) {
+			// Skip Dependabot workflows if the setting is enabled
+			if (ignoreDependabot && run.actor?.login === 'dependabot[bot]') {
+				continue;
+			}
+
 			const workflowKey = run.name || 'unknown-workflow';
 			if (!workflowMap.has(workflowKey)) {
 				workflowMap.set(workflowKey, run);
@@ -98,7 +103,7 @@ export class GitHubApiClient {
 		});
 	}
 
-	async getRepositoryStatus(repository: Repository, maxRunsToFetch: number = 20): Promise<{
+	async getRepositoryStatus(repository: Repository, maxRunsToFetch: number = 20, ignoreDependabot: boolean = false): Promise<{
 		repository: Repository;
 		workflowRuns: WorkflowRun[];
 		error?: string;
@@ -112,7 +117,7 @@ export class GitHubApiClient {
 			);
 
 			// Deduplicate to keep only the latest run per workflow
-			const uniqueWorkflowRuns = this.deduplicateWorkflowRuns(allWorkflowRuns);
+			const uniqueWorkflowRuns = this.deduplicateWorkflowRuns(allWorkflowRuns, ignoreDependabot);
 
 			return {
 				repository,
@@ -127,7 +132,7 @@ export class GitHubApiClient {
 		}
 	}
 
-	async getAllRepositoryStatuses(repositories: Repository[], maxRunsToFetch: number = 20): Promise<Array<{
+	async getAllRepositoryStatuses(repositories: Repository[], maxRunsToFetch: number = 20, ignoreDependabot: boolean = false): Promise<Array<{
 		repository: Repository;
 		workflowRuns: WorkflowRun[];
 		error?: string;
@@ -135,7 +140,7 @@ export class GitHubApiClient {
 		const enabledRepositories = repositories.filter(repo => repo.enabled);
 
 		// Process repositories in parallel, but with some throttling
-		const promises = enabledRepositories.map(repo => this.getRepositoryStatus(repo, maxRunsToFetch));
+		const promises = enabledRepositories.map(repo => this.getRepositoryStatus(repo, maxRunsToFetch, ignoreDependabot));
 
 		return Promise.all(promises);
 	}

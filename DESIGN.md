@@ -28,7 +28,8 @@ github-repository-monitoring/
 │   │   │   └── RefreshButton.svelte
 │   │   ├── services/               # API and business logic
 │   │   │   ├── github-api.ts       # GitHub API client
-│   │   │   └── config-loader.ts    # YAML configuration loader
+│   │   │   ├── config-loader.ts    # YAML configuration loader
+│   │   │   └── token-storage.ts    # Token and user settings storage
 │   │   ├── types/                  # TypeScript type definitions
 │   │   │   └── github.ts
 │   │   └── utils/                  # Utility functions
@@ -50,6 +51,8 @@ github-repository-monitoring/
 4. **Configuration Management**: YAML-based repository configuration with hot-reload
 5. **Responsive Design**: Table layout with horizontal scroll on mobile devices
 6. **Error Handling**: Comprehensive error display and graceful degradation
+7. **Dependabot Filtering**: User setting to hide workflows triggered by Dependabot
+8. **Settings Management**: Persistent localStorage-based settings with intuitive UI
 
 ### Enhanced Features (Future)
 1. **Real-time Updates**: Auto-refresh workflow statuses
@@ -146,6 +149,9 @@ interface WorkflowRun {
   html_url: string;
   head_branch: string;
   head_sha: string;
+  actor: {
+    login: string;
+  };
 }
 
 interface Repository {
@@ -226,7 +232,14 @@ interface Repository {
 - [x] Comprehensive error handling and display
 - [x] Real-time config changes without restart
 
-### Phase 4: Future Enhancements
+### Phase 4: Settings & Filtering ✅ **COMPLETED**
+- [x] GitHub token management with secure localStorage storage
+- [x] Token validation and format checking
+- [x] Settings popup with intuitive UI
+- [x] Dependabot workflow filtering capability
+- [x] Persistent user preferences across sessions
+
+### Phase 5: Future Enhancements
 - [ ] Multi-branch monitoring per repository
 - [ ] Workflow run history and trends
 - [ ] Browser notifications for status changes
@@ -275,6 +288,8 @@ repositories:
 - Use environment variables for sensitive data
 - Implement proper CORS policies
 - Consider using GitHub Apps for enhanced security
+- Client-side token storage uses browser localStorage (secure for SPA)
+- Token validation prevents invalid formats from being stored
 
 ## Future Enhancements
 
@@ -299,6 +314,8 @@ repositories:
 6. **Responsive Design**: Mobile-friendly with horizontal scroll and touch-optimized controls
 7. **Error Handling**: Network errors, API rate limits, repository access issues
 8. **TypeScript**: Full type safety across the application
+9. **Settings Management**: Secure token storage and user preferences in localStorage
+10. **Dependabot Filtering**: Option to hide workflows triggered by Dependabot (actor-based filtering)
 
 ### 🎯 **Key Architectural Decisions**
 
@@ -307,6 +324,8 @@ repositories:
 - **No Backend Required**: Pure frontend solution using GitHub's public API
 - **Progressive Enhancement**: Works without JavaScript for basic HTML table
 - **Minimal Dependencies**: Only essential packages (SvelteKit, TypeScript, js-yaml)
+- **Client-side Settings**: User preferences stored securely in localStorage
+- **Actor-based Filtering**: Workflow filtering based on GitHub actor information
 
 ### 📊 **Performance Characteristics**
 
