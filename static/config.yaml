@@ -14,6 +14,36 @@ repositories:
     branch: "master"
     enabled: true
 
+  - name: "alfresco-ansible-deployment"
+    owner: "Alfresco"
+    url: "https://github.com/Alfresco/alfresco-ansible-deployment/"
+    branch: "master"
+    enabled: true
+
+  - name: "alfresco-dockerfiles-bakery"
+    owner: "Alfresco"
+    url: "https://github.com/Alfresco/alfresco-dockerfiles-bakery"
+    branch: "main"
+    enabled: true
+
+  - name: "alfresco-cloud-infrastructure"
+    owner: "Alfresco"
+    url: "https://github.com/Alfresco/alfresco-cloud-infrastructure"
+    branch: "main"
+    enabled: true
+
+  - name: "alfresco-docker-base-tomcat"
+    owner: "Alfresco"
+    url: "https://github.com/Alfresco/alfresco-docker-base-tomcat"
+    branch: "master"
+    enabled: true
+
+  - name: "alfresco-docker-base-java"
+    owner: "Alfresco"
+    url: "https://github.com/Alfresco/alfresco-docker-base-java"
+    branch: "master"
+    enabled: true
+
   - name: "my-awesome-project"
     owner: "myusername"
     url: "https://github.com/myusername/my-awesome-project"
