@@ -313,17 +313,26 @@
 						    class:in-progress={cumulativeStatus?.status === 'in_progress'}
 						    class:cancelled={cumulativeStatus?.status === 'cancelled'}
 						    class:error-row={repoStatus.error}
-						    class:expanded={isExpanded}>
+						    class:expanded={isExpanded}
+						    class:clickable={!repoStatus.error && repoStatus.workflowRuns.length > 0}
+						    on:click={() => !repoStatus.error && repoStatus.workflowRuns.length > 0 && toggleRepository(repoKey)}
+						    on:keydown={(e) => {
+						    	if ((e.key === 'Enter' || e.key === ' ') && !repoStatus.error && repoStatus.workflowRuns.length > 0) {
+						    		e.preventDefault();
+						    		toggleRepository(repoKey);
+						    	}
+						    }}
+						    tabindex={!repoStatus.error && repoStatus.workflowRuns.length > 0 ? 0 : -1}
+						    role={!repoStatus.error && repoStatus.workflowRuns.length > 0 ? "button" : undefined}
+						    aria-expanded={!repoStatus.error && repoStatus.workflowRuns.length > 0 ? isExpanded : undefined}>
 
 							<td class="expand-cell">
 								{#if repoStatus.error}
 									<span class="expand-icon error">❌</span>
 								{:else if repoStatus.workflowRuns.length > 0}
-									<button class="expand-button" on:click={() => toggleRepository(repoKey)}>
-										<span class="expand-icon" class:expanded={isExpanded}>
-											{isExpanded ? '▼' : '▶'}
-										</span>
-									</button>
+									<span class="expand-icon" class:expanded={isExpanded}>
+										{isExpanded ? '▼' : '▶'}
+									</span>
 								{:else}
 									<span class="expand-icon empty">○</span>
 								{/if}
@@ -645,10 +654,20 @@
 	.repo-summary-row {
 		background-color: #f8f9fa;
 		font-weight: 500;
-		cursor: pointer;
 	}
 
-	.repo-summary-row:hover {
+	.repo-summary-row.clickable {
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+	}
+
+	.repo-summary-row.clickable:hover {
+		background-color: #e9ecef;
+	}
+
+	.repo-summary-row.clickable:focus {
+		outline: 2px solid #007cba;
+		outline-offset: -2px;
 		background-color: #e9ecef;
 	}
 
@@ -679,28 +698,15 @@
 		padding: 0.5rem;
 	}
 
-	.expand-button {
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 0.25rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 4px;
-		transition: background-color 0.2s ease;
-	}
 
-	.expand-button:hover {
-		background-color: rgba(0, 0, 0, 0.1);
-	}
 
 	.expand-icon {
-		font-size: 0.8rem;
+		font-size: 0.9rem;
 		transition: transform 0.2s ease;
 		color: #586069;
+		display: inline-block;
+		width: 16px;
+		text-align: center;
 	}
 
 	.expand-icon.expanded {
