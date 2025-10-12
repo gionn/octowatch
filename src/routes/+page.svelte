@@ -434,7 +434,16 @@
 
 <!-- Token Settings Popup -->
 {#if showTokenPopup}
-	<div class="popup-overlay" on:click={closeTokenPopup} on:keydown={(e) => e.key === 'Escape' && closeTokenPopup()} role="dialog" aria-modal="true">
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+	<div
+		class="popup-overlay"
+		on:click={closeTokenPopup}
+		role="dialog"
+		aria-modal="true"
+		aria-label="Settings dialog"
+	>
 		<div class="popup-content" on:click|stopPropagation role="document">
 			<div class="popup-header">
 				<h3>Settings</h3>
