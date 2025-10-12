@@ -265,16 +265,6 @@
 			{lastUpdated}
 			on:refresh={handleRefresh}
 		/>
-
-		{#if config?.dashboard?.refresh_interval}
-			<div class="auto-refresh-info">
-				<span class="auto-refresh-indicator">🔄</span>
-				Auto-refresh: {config.dashboard.refresh_interval}s
-				{#if typeof window !== 'undefined'}
-					<span class="dev-indicator">| Config watch: ON</span>
-				{/if}
-			</div>
-		{/if}
 	</div>
 
 	{#if loading && repositoryStatuses.length === 0}
@@ -881,27 +871,7 @@
 		margin-bottom: 1rem;
 	}
 
-	.auto-refresh-info {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 0.5rem;
-		padding: 0.5rem 1rem;
-		background-color: #e3f2fd;
-		border: 1px solid #bbdefb;
-		border-radius: 6px;
-		font-size: 0.85rem;
-		color: #1565c0;
-	}
 
-	.auto-refresh-indicator {
-		animation: spin 2s linear infinite;
-	}
-
-	.dev-indicator {
-		color: #ff9800;
-		font-weight: 500;
-	}
 
 	@keyframes spin {
 		from { transform: rotate(0deg); }
@@ -926,12 +896,6 @@
 
 		.workflows-table {
 			font-size: 0.8rem;
-		}
-
-		.auto-refresh-info {
-			flex-direction: column;
-			text-align: center;
-			gap: 0.25rem;
 		}
 
 		.header-content {
