@@ -1,5 +1,5 @@
 import * as yaml from 'js-yaml';
-import { base } from '$app/paths';
+import { asset } from '$app/paths';
 import type { Config, RepositoryGroup, Repository } from '../types/github.js';
 
 // Configuration cache and watching
@@ -10,7 +10,7 @@ export async function loadConfig(): Promise<Config> {
 	try {
 		// Fetch config.yaml from static directory
 		if (typeof window !== 'undefined') {
-			const response = await fetch(`${base}/config.yaml?` + Date.now());
+			const response = await fetch(asset('/config.yaml') + '?' + Date.now());
 			if (response.ok) {
 				const yamlContent = await response.text();
 				const config = await loadConfigFromYaml(yamlContent);

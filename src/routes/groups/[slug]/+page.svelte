@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
 	import HeaderActions from '$lib/components/HeaderActions.svelte';
 	import { loadConfig, getCachedConfig, getRepositoryGroupBySlug } from '$lib/services/config-loader.js';
 	import { GitHubApiClient } from '$lib/services/github-api.js';
@@ -225,7 +226,7 @@
 		<div class="header-content">
 			<div class="header-text">
 				<div class="breadcrumb">
-					<a href="/">Repository Groups</a> / {currentGroup?.name || slug}
+					<a href={resolve('/')}>Repository Groups</a> / {currentGroup?.name || slug}
 				</div>
 				<h1>{currentGroup?.name || 'Repository Group'}</h1>
 				<p>{currentGroup?.description || 'Monitor GitHub Actions workflows for this group'}</p>
