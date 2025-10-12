@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { resolve, asset } from '$app/paths';
 	import { loadConfig, getRepositoryGroups } from '$lib/services/config-loader.js';
-	import { TokenStorage } from '$lib/services/token-storage.js';
 	import HeaderActions from '$lib/components/HeaderActions.svelte';
 	import type { Config, RepositoryGroup } from '$lib/types/github.js';
 
@@ -30,7 +30,7 @@
 		if (typeof window !== 'undefined') {
 			configWatchInterval = setInterval(async () => {
 				try {
-					const response = await fetch('/config.yaml?' + Date.now());
+					const response = await fetch(asset('/config.yaml') + '?' + Date.now());
 					if (response.ok) {
 						const yamlContent = await response.text();
 						const { loadConfigFromYaml } = await import('$lib/services/config-loader.js');
@@ -76,7 +76,7 @@
 	<header>
 		<div class="header-content">
 			<div class="header-text">
-				<h1>GitHub Repository Groups</h1>
+				<h1>{config?.dashboard?.title || 'Octowatch dashboard'}</h1>
 				<p>Select a group to monitor GitHub Actions workflows</p>
 			</div>
 			<HeaderActions
@@ -107,7 +107,7 @@
 							<span class="repo-count">{group.repositories.filter(r => r.enabled).length} repositories</span>
 						</div>
 						<div class="group-actions">
-							<a href="/groups/{group.slug}" class="monitor-link">
+							<a href={resolve('/groups/[slug]', { slug: group.slug })} class="monitor-link">
 								Monitor Workflows →
 							</a>
 						</div>

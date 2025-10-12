@@ -20,26 +20,13 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 
 ## Quick Start
 
-### Prerequisites
+### Recommended: Fork and Deploy (GitHub Pages)
 
-- Node.js (v18 or later)
-- npm or yarn
-- GitHub repositories with Actions workflows
+The easiest way to get started with OctoWatch is to fork this repository and deploy it using GitHub Pages:
 
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/octowatch.git
-   cd octowatch
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Configure repository groups**:
-   Edit `static/config.yaml` to add your repository groups:
+1. **Fork this repository** to your GitHub account
+2. **Configure your repositories**:
+   Edit `static/config.yaml` in your fork to add your repository groups:
 
    ```yaml
    repository_groups:
@@ -55,7 +42,50 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
            enabled: true
    ```
 
+3. **Enable GitHub Pages**:
+   - Go to your fork's Settings → Pages
+   - Set Source to "GitHub Actions"
+   - The included `build.yaml` workflow will automatically build and deploy your dashboard
+
+4. **Access your dashboard**:
+   Your OctoWatch dashboard will be available at:
+   `https://your-username.github.io/octowatch`
+
+5. **Configure GitHub token** (optional but recommended):
+   - Generate a GitHub Personal Access Token (fine-grained tokens recommended with "Actions" read-only access)
+   - Open your deployed dashboard and click the gear icon
+   - Enter your token for better rate limits and private repo access
+
+### Local Development
+
+If you prefer to run OctoWatch locally:
+
+#### Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+- GitHub repositories with Actions workflows
+
+#### Installation
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/your-username/octowatch.git
+   cd octowatch
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Configure repository groups**:
+   Edit `static/config.yaml` to add your repository groups (same as above)
+
 4. **Start the development server**:
+
    ```bash
    npm run dev
    ```
@@ -106,12 +136,14 @@ github:
 
 # Dashboard settings
 dashboard:
+  title: "GitHub Repository Groups"  # Main dashboard title
   refresh_interval: 30              # Auto-refresh interval in seconds
   max_runs_to_fetch: 20            # Max workflow runs to fetch per repo
   show_statuses: ["success", "failure", "in_progress"]
 ```
 
 **Navigation:**
+
 - The home page shows all repository groups as cards
 - Click "Monitor Workflows →" on any group card to view its repositories
 - Use the breadcrumb navigation to return to the groups overview
@@ -173,7 +205,7 @@ npm run dev
 
 ## Project Structure
 
-```
+```sh
 src/
 ├── routes/
 │   ├── +layout.svelte          # Main application layout
@@ -201,6 +233,7 @@ src/
 The dashboard displays repositories in a **collapsible table format**:
 
 **📋 Repository Summary (Collapsed by default):**
+
 - **▶/▼ Toggle**: Click to expand/collapse workflow details
 - **Repository Name**: Clickable link to GitHub repository
 - **Branch**: Monitored branch name
@@ -210,6 +243,7 @@ The dashboard displays repositories in a **collapsible table format**:
 - **View All**: Link to repository's GitHub Actions page
 
 **🔍 Expanded Details (Click to show):**
+
 - Individual workflow runs with full information
 - Workflow name, specific status, commit SHA, timing
 - Direct links to individual workflow run pages
@@ -231,21 +265,25 @@ The dashboard uses color coding with **smart status aggregation**:
 ### Common Issues
 
 **"Repository not found" errors**:
+
 - Verify repository names and owners in `config.yaml`
 - Check if repositories are public or if you have access
 - Ensure your GitHub token has appropriate permissions
 
 **Rate limit exceeded**:
+
 - Add a GitHub personal access token to `config.yaml`
 - Reduce the number of monitored repositories
 - Increase the refresh interval
 
 **Configuration errors**:
+
 - Validate your YAML syntax
 - Ensure all required fields are present
 - Check the browser console for detailed error messages
 
 **Dependabot workflows still showing**:
+
 - Open Settings (gear icon) and enable "Ignore Dependabot workflows"
 - Settings are saved automatically and take effect immediately
 - This filters workflows where the actor is "dependabot[bot]"
