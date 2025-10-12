@@ -21,7 +21,7 @@ repository_groups:
 
       - name: "alfresco-ansible-deployment"
         owner: "Alfresco"
-        url: "https://github.com/Alfresco/alfresco-ansible-deployment/"
+        url: "https://github.com/Alfresco/alfresco-ansible-deployment"
         branch: "master"
         enabled: true
 
@@ -73,7 +73,7 @@ github:
 # Dashboard settings
 dashboard:
   # Auto-refresh interval in seconds
-  refresh_interval: 30
+  refresh_interval: 300
 
   # Maximum number of workflow runs to fetch per repository (deduplicates to latest per workflow)
   max_runs_to_fetch: 20
