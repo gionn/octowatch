@@ -20,26 +20,13 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 
 ## Quick Start
 
-### Prerequisites
+### Recommended: Fork and Deploy (GitHub Pages)
 
-- Node.js (v18 or later)
-- npm or yarn
-- GitHub repositories with Actions workflows
+The easiest way to get started with OctoWatch is to fork this repository and deploy it using GitHub Pages:
 
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/octowatch.git
-   cd octowatch
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Configure repository groups**:
-   Edit `static/config.yaml` to add your repository groups:
+1. **Fork this repository** to your GitHub account
+2. **Configure your repositories**:
+   Edit `static/config.yaml` in your fork to add your repository groups:
 
    ```yaml
    repository_groups:
@@ -54,6 +41,46 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
            branch: "main"
            enabled: true
    ```
+
+3. **Enable GitHub Pages**:
+   - Go to your fork's Settings → Pages
+   - Set Source to "GitHub Actions"
+   - The included `build.yaml` workflow will automatically build and deploy your dashboard
+
+4. **Access your dashboard**:
+   Your OctoWatch dashboard will be available at:
+   `https://your-username.github.io/octowatch`
+
+5. **Configure GitHub token** (optional but recommended):
+   - Generate a GitHub Personal Access Token (fine-grained tokens recommended with "Actions" read-only access)
+   - Open your deployed dashboard and click the gear icon
+   - Enter your token for better rate limits and private repo access
+
+### Local Development
+
+If you prefer to run OctoWatch locally:
+
+#### Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+- GitHub repositories with Actions workflows
+
+#### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/octowatch.git
+   cd octowatch
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure repository groups**:
+   Edit `static/config.yaml` to add your repository groups (same as above)
 
 4. **Start the development server**:
    ```bash
