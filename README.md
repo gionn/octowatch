@@ -2,6 +2,8 @@
 
 A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Actions workflows across multiple repositories. Built with TypeScript and designed to provide real-time visibility into your CI/CD pipeline health.
 
+*This application was fully developed using GitHub Copilot with Claude Sonnet 4, showcasing the power of AI-assisted development.*
+
 ## Features
 
 - 🔍 **Multi-Repository Monitoring**: Track GitHub Actions workflows across multiple repositories
