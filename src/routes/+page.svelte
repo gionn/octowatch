@@ -852,30 +852,13 @@
 		white-space: nowrap;
 	}
 
-	.error-cell, .no-workflows-cell {
-		text-align: center;
-		font-style: italic;
-		color: #6c757d;
-	}
-
 	.error-message {
 		color: #d73a49;
 		font-weight: 500;
 	}
 
-	.no-workflows-message {
-		color: #6c757d;
-	}
-
 	.time-cell {
 		color: #586069;
-		white-space: nowrap;
-	}
-
-	.workflow-cell {
-		max-width: 200px;
-		overflow: hidden;
-		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
@@ -934,10 +917,6 @@
 			flex-direction: column;
 			text-align: center;
 			gap: 0.25rem;
-		}
-
-		.workflow-cell {
-			max-width: 150px;
 		}
 
 		.header-content {
