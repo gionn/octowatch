@@ -132,7 +132,12 @@
 				<p>Select a group to monitor GitHub Actions workflows</p>
 			</div>
 			<div class="header-actions">
-				<button class="settings-btn" on:click={openTokenPopup} title="Settings">
+				<button class="action-btn refresh-btn" on:click={handleRefresh} disabled={loading} title={loading ? 'Loading...' : 'Refresh Groups'}>
+					<svg class="refresh-icon" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+					</svg>
+				</button>
+				<button class="action-btn settings-btn" on:click={openTokenPopup} title="Settings">
 					<svg class="gear-icon" viewBox="0 0 24 24" fill="currentColor">
 						<path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.5,12.65 19.5,12.32 19.5,12C19.5,11.68 19.5,11.35 19.43,11.03L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.65 15.48,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.52,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11.03C4.5,11.35 4.5,11.68 4.5,12C4.5,12.32 4.5,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.52,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.48,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
 					</svg>
@@ -141,12 +146,6 @@
 			</div>
 		</div>
 	</header>
-
-	<div class="controls">
-		<button class="refresh-btn" on:click={handleRefresh} disabled={loading}>
-			{loading ? 'Loading...' : 'Refresh Groups'}
-		</button>
-	</div>
 
 	{#if loading}
 		<div class="loading">Loading groups...</div>
@@ -281,9 +280,10 @@
 	.header-actions {
 		display: flex;
 		align-items: center;
+		gap: 0.5rem;
 	}
 
-	.settings-btn {
+	.action-btn {
 		position: relative;
 		background: none;
 		border: none;
@@ -294,14 +294,29 @@
 		transition: all 0.2s ease;
 		color: #666;
 		padding: 8px;
+		border-radius: 6px;
 	}
 
-	.settings-btn:hover {
+	.action-btn:hover:not(:disabled) {
 		color: #007cba;
+		background-color: #f8f9fa;
+		transform: scale(1.1);
+	}
+
+	.action-btn:disabled {
+		color: #adb5bd;
+		cursor: not-allowed;
+	}
+
+	.settings-btn:hover:not(:disabled) {
 		transform: rotate(90deg) scale(1.1);
 	}
 
-	.gear-icon {
+	.refresh-btn:hover:not(:disabled) {
+		transform: rotate(360deg) scale(1.1);
+	}
+
+	.gear-icon, .refresh-icon {
 		width: 32px;
 		height: 32px;
 	}
@@ -353,30 +368,7 @@
 		font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 	}
 
-	.controls {
-		margin-bottom: 1rem;
-	}
 
-	.refresh-btn {
-		background: #007cba;
-		color: white;
-		border: none;
-		padding: 0.75rem 1.5rem;
-		border-radius: 6px;
-		cursor: pointer;
-		font-size: 1rem;
-		transition: all 0.2s ease;
-	}
-
-	.refresh-btn:hover:not(:disabled) {
-		background: #005a8b;
-		transform: translateY(-1px);
-	}
-
-	.refresh-btn:disabled {
-		background: #6c757d;
-		cursor: not-allowed;
-	}
 
 	.groups-container {
 		max-width: 1200px;
