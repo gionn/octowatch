@@ -2,7 +2,7 @@
 
 A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Actions workflows across multiple repositories. Built with TypeScript and designed to provide real-time visibility into your CI/CD pipeline health.
 
-*This application was fully developed using GitHub Copilot with Claude Sonnet 4, showcasing the power of AI-assisted development.*
+_This application was fully developed using GitHub Copilot with Claude Sonnet 4, showcasing the power of AI-assisted development._
 
 ## Features
 
@@ -29,11 +29,15 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 ### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/your-username/octowatch.git
    cd octowatch
 
+   ```
+
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
@@ -56,6 +60,7 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
    ```
 
 4. **Start the development server**:
+
    ```bash
    npm run dev
    ```
@@ -106,12 +111,13 @@ github:
 
 # Dashboard settings
 dashboard:
-  refresh_interval: 30              # Auto-refresh interval in seconds
-  max_runs_to_fetch: 20            # Max workflow runs to fetch per repo
+  refresh_interval: 30 # Auto-refresh interval in seconds
+  max_runs_to_fetch: 20 # Max workflow runs to fetch per repo
   show_statuses: ["success", "failure", "in_progress"]
 ```
 
 **Navigation:**
+
 - The home page shows all repository groups as cards
 - Click "Monitor Workflows →" on any group card to view its repositories
 - Use the breadcrumb navigation to return to the groups overview
@@ -154,13 +160,13 @@ npm run dev
 
 ## Repository Configuration Options
 
-| Field | Description | Required |
-|-------|-------------|----------|
-| `name` | Repository name | ✅ |
-| `owner` | GitHub username/organization | ✅ |
-| `url` | Full GitHub repository URL | ✅ |
-| `branch` | Branch to monitor (default: main) | ✅ |
-| `enabled` | Whether to monitor this repo | ✅ |
+| Field     | Description                       | Required |
+| --------- | --------------------------------- | -------- |
+| `name`    | Repository name                   | ✅       |
+| `owner`   | GitHub username/organization      | ✅       |
+| `url`     | Full GitHub repository URL        | ✅       |
+| `branch`  | Branch to monitor (default: main) | ✅       |
+| `enabled` | Whether to monitor this repo      | ✅       |
 
 ## Available Scripts
 
@@ -201,6 +207,7 @@ src/
 The dashboard displays repositories in a **collapsible table format**:
 
 **📋 Repository Summary (Collapsed by default):**
+
 - **▶/▼ Toggle**: Click to expand/collapse workflow details
 - **Repository Name**: Clickable link to GitHub repository
 - **Branch**: Monitored branch name
@@ -210,6 +217,7 @@ The dashboard displays repositories in a **collapsible table format**:
 - **View All**: Link to repository's GitHub Actions page
 
 **🔍 Expanded Details (Click to show):**
+
 - Individual workflow runs with full information
 - Workflow name, specific status, commit SHA, timing
 - Direct links to individual workflow run pages
@@ -231,21 +239,25 @@ The dashboard uses color coding with **smart status aggregation**:
 ### Common Issues
 
 **"Repository not found" errors**:
+
 - Verify repository names and owners in `config.yaml`
 - Check if repositories are public or if you have access
 - Ensure your GitHub token has appropriate permissions
 
 **Rate limit exceeded**:
+
 - Add a GitHub personal access token to `config.yaml`
 - Reduce the number of monitored repositories
 - Increase the refresh interval
 
 **Configuration errors**:
+
 - Validate your YAML syntax
 - Ensure all required fields are present
 - Check the browser console for detailed error messages
 
 **Dependabot workflows still showing**:
+
 - Open Settings (gear icon) and enable "Ignore Dependabot workflows"
 - Settings are saved automatically and take effect immediately
 - This filters workflows where the actor is "dependabot[bot]"
