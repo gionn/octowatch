@@ -10,3 +10,12 @@ repos:
       - id: mixed-line-ending
       - id: end-of-file-fixer
       - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: npm-check
+        name: npm run check
+        entry: npm run check
+        language: system
+        files: \.(js|ts|svelte)$
+        pass_filenames: false
