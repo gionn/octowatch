@@ -120,10 +120,19 @@ dashboard:
 For better rate limits and private repository access:
 
 1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Generate a new token with `repo` and `actions:read` scopes
+2. Generate a new token with appropriate scopes:
+   - **Classic tokens**: `repo` and `actions:read` scopes
+   - **Fine-grained tokens**: "Actions" read-only access
 3. Click the gear icon in the dashboard to open Settings
 4. Enter your token and configure other preferences (like Dependabot filtering)
 5. **Never commit tokens to your repository!**
+
+**Supported Token Formats:**
+
+- Classic tokens (40-character hex strings)
+- Fine-grained personal access tokens (`ghp_...`)
+- New GitHub PAT format (`github_pat_...`)
+- OAuth and server tokens (`gho_`, `ghu_`, `ghs_`, `ghr_`)
 
 ### Settings & Preferences
 

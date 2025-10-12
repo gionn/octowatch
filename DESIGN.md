@@ -26,7 +26,8 @@ github-repository-monitoring/
 │   │           └── +page.svelte              # Individual group monitoring
 │   ├── lib/
 │   │   ├── components/                       # Reusable UI components
-│   │   │   └── RefreshButton.svelte
+│   │   │   ├── RefreshButton.svelte          # Legacy refresh component
+│   │   │   └── HeaderActions.svelte          # Coordinated refresh & settings buttons
 │   │   ├── services/                         # API and business logic
 │   │   │   ├── github-api.ts                 # GitHub API client
 │   │   │   ├── config-loader.ts              # YAML configuration loader with groups
@@ -84,7 +85,8 @@ The dashboard uses a **unified table approach** with collapsible functionality:
 - Real-time updates and configuration watching
 
 **Supporting Components**:
-- `RefreshButton.svelte` - Manual refresh with last updated display
+- `HeaderActions.svelte` - Reusable coordinated refresh and settings buttons
+- `RefreshButton.svelte` - Legacy refresh component (deprecated)
 - Configuration and API services in `src/lib/services/`
 
 ### Collapsible Repository View
@@ -250,10 +252,11 @@ interface Repository {
 
 ### Phase 4: Settings & Filtering ✅ **COMPLETED**
 - [x] GitHub token management with secure localStorage storage
-- [x] Token validation and format checking
+- [x] Token validation and format checking (supports all GitHub token formats)
 - [x] Settings popup with intuitive UI
 - [x] Dependabot workflow filtering capability
 - [x] Persistent user preferences across sessions
+- [x] Reusable HeaderActions component with coordinated refresh and settings buttons
 
 ### Phase 5: Future Enhancements
 - [ ] Multi-branch monitoring per repository
@@ -306,6 +309,14 @@ repositories:
 - Consider using GitHub Apps for enhanced security
 - Client-side token storage uses browser localStorage (secure for SPA)
 - Token validation prevents invalid formats from being stored
+- **Supported Token Formats**:
+  - Classic tokens (40-character hexadecimal strings)
+  - Fine-grained personal access tokens (`ghp_...`)
+  - New GitHub PAT format (`github_pat_...`)
+  - OAuth tokens (`gho_...`)
+  - User-to-server tokens (`ghu_...`)
+  - Server-to-server tokens (`ghs_...`)
+  - Refresh tokens (`ghr_...`)
 
 ## Future Enhancements
 
@@ -331,7 +342,9 @@ repositories:
 7. **Error Handling**: Network errors, API rate limits, repository access issues
 8. **TypeScript**: Full type safety across the application
 9. **Settings Management**: Secure token storage and user preferences in localStorage
-10. **Dependabot Filtering**: Option to hide workflows triggered by Dependabot (actor-based filtering)
+10. **Enhanced Token Validation**: Support for all GitHub token formats (classic, ghp_, github_pat_, etc.)
+11. **Reusable Components**: HeaderActions component with coordinated refresh and settings buttons
+12. **Dependabot Filtering**: Option to hide workflows triggered by Dependabot (actor-based filtering)
 
 ### 🎯 **Key Architectural Decisions**
 
@@ -342,6 +355,7 @@ repositories:
 - **Minimal Dependencies**: Only essential packages (SvelteKit, TypeScript, js-yaml)
 - **Client-side Settings**: User preferences stored securely in localStorage
 - **Actor-based Filtering**: Workflow filtering based on GitHub actor information
+- **Component Architecture**: Reusable HeaderActions component eliminates code duplication
 
 ### 📊 **Performance Characteristics**
 

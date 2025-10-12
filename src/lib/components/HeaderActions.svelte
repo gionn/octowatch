@@ -115,11 +115,13 @@
 						id="token-input"
 						type="password"
 						bind:value={tokenInput}
-						placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+						placeholder="ghp_... or github_pat_..."
 						autocomplete="off"
 					/>
 					<p class="help-text">
 						Add a GitHub token to increase API rate limits and access private repositories.
+						Supports classic tokens (ghp_) and fine-grained tokens (github_pat_).
+						For fine-grained tokens, ensure "Actions" read-only access is granted.
 						Leave empty to use unauthenticated requests with lower rate limits.
 					</p>
 				</div>

@@ -68,14 +68,16 @@ export class TokenStorage {
 	 * Validate token format (basic check)
 	 */
 	static isValidTokenFormat(token: string): boolean {
-		// GitHub personal access tokens are typically 40 characters (classic) or start with 'ghp_' (fine-grained)
+		// GitHub personal access tokens are typically 40 characters (classic) or start with various prefixes
 		const trimmed = token.trim();
 		return trimmed.length >= 4 && (
 			/^[a-f0-9]{40}$/i.test(trimmed) || // Classic token
 			/^ghp_[a-zA-Z0-9]{36}$/.test(trimmed) || // Fine-grained personal access token
 			/^gho_[a-zA-Z0-9]{36}$/.test(trimmed) || // OAuth token
 			/^ghu_[a-zA-Z0-9]{36}$/.test(trimmed) || // User-to-server token
-			/^ghs_[a-zA-Z0-9]{36}$/.test(trimmed)    // Server-to-server token
+			/^ghs_[a-zA-Z0-9]{36}$/.test(trimmed) || // Server-to-server token
+			/^ghr_[a-zA-Z0-9]{36}$/.test(trimmed) || // Refresh token
+			/^github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}$/.test(trimmed) // New GitHub PAT format
 		);
 	}
 
