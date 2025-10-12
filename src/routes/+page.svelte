@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { base } from '$app/paths';
 	import { loadConfig, getRepositoryGroups } from '$lib/services/config-loader.js';
 	import { TokenStorage } from '$lib/services/token-storage.js';
 	import HeaderActions from '$lib/components/HeaderActions.svelte';
@@ -30,7 +31,7 @@
 		if (typeof window !== 'undefined') {
 			configWatchInterval = setInterval(async () => {
 				try {
-					const response = await fetch('/config.yaml?' + Date.now());
+					const response = await fetch(`${base}/config.yaml?` + Date.now());
 					if (response.ok) {
 						const yamlContent = await response.text();
 						const { loadConfigFromYaml } = await import('$lib/services/config-loader.js');
