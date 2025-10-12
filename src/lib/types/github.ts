@@ -24,6 +24,7 @@ export interface Config {
 		refresh_interval: number;
 		max_runs_to_fetch: number;
 		show_statuses: string[];
+		title?: string;
 	};
 }
 

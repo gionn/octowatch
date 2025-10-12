@@ -76,7 +76,7 @@
 	<header>
 		<div class="header-content">
 			<div class="header-text">
-				<h1>GitHub Repository Groups</h1>
+				<h1>{config?.dashboard?.title || 'Octowatch dashboard'}</h1>
 				<p>Select a group to monitor GitHub Actions workflows</p>
 			</div>
 			<HeaderActions

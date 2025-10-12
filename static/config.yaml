@@ -72,6 +72,9 @@ github:
 
 # Dashboard settings
 dashboard:
+  # Dashboard title displayed on the main page
+  title: "Alfresco repositories monitoring"
+
   # Auto-refresh interval in seconds
   refresh_interval: 300
 
