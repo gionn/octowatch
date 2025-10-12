@@ -1,4 +1,4 @@
-# GitHub Repository Monitoring Dashboard
+# OctoWatch
 
 A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Actions workflows across multiple repositories. Built with TypeScript and designed to provide real-time visibility into your CI/CD pipeline health.
 
@@ -30,9 +30,8 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 
 1. **Clone the repository**:
    ```bash
-   git clone <your-repo-url>
-   cd github-repository-monitoring
-   ```
+   git clone https://github.com/your-username/octowatch.git
+   cd octowatch
 
 2. **Install dependencies**:
    ```bash

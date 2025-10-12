@@ -69,7 +69,7 @@
 </script>
 
 <svelte:head>
-	<title>GitHub Repository Monitoring Dashboard</title>
+	<title>OctoWatch</title>
 </svelte:head>
 
 <div class="dashboard">

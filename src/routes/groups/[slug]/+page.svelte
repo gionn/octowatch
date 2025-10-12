@@ -217,7 +217,7 @@
 </script>
 
 <svelte:head>
-	<title>{currentGroup?.name || 'Repository Group'} - GitHub Repository Monitoring</title>
+	<title>{currentGroup?.name || 'Repository Group'} - OctoWatch</title>
 </svelte:head>
 
 <div class="dashboard">

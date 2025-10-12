@@ -1,4 +1,4 @@
-# GitHub Repository Monitoring Dashboard - Design Document
+# OctoWatch - Design Document
 
 ## Project Overview
 
@@ -16,7 +16,7 @@ A SvelteKit-based Single Page Application (SPA) that monitors GitHub Actions wor
 
 ### Project Structure
 ```
-github-repository-monitoring/
+octowatch/
 ├── src/
 │   ├── routes/
 │   │   ├── +layout.svelte                    # Main layout

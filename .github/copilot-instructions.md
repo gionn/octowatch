@@ -1,4 +1,4 @@
-# GitHub Repository Monitoring - Copilot Instructions
+# OctoWatch - Copilot Instructions
 
 ## Project Overview
 This is a SvelteKit-based GitHub Actions workflow monitoring dashboard that displays the status of GitHub workflows across multiple repositories in a collapsible table format.
