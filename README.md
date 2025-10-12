@@ -5,15 +5,16 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 ## Features
 
 - 🔍 **Multi-Repository Monitoring**: Track GitHub Actions workflows across multiple repositories
-- 📊 **Collapsible Table View**: Compact repository summary with expandable workflow details
+- � **Repository Groups**: Organize repositories into logical groups for better management
+- �📊 **Collapsible Table View**: Compact repository summary with expandable workflow details
 - 🎯 **Cumulative Status**: Smart status aggregation showing worst-case status per repository
 - 📈 **Real-time Updates**: Automatic refresh with configurable intervals and config file watching
-- 🎨 **Clean UI**: Modern, responsive table layout with color-coded status indicators
+- 🎨 **Clean UI**: Modern, responsive design with color-coded status indicators
 - ⚙️ **YAML Configuration**: Simple configuration management via `static/config.yaml`
 - 🤖 **Dependabot Filtering**: Option to hide Dependabot-triggered workflows from the dashboard
 - 🔐 **Token Management**: Secure GitHub token storage with validation and rate limit improvements
 - 🚀 **Fast Performance**: Built with SvelteKit and Vite for optimal performance
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices with horizontal scroll
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ## Quick Start
 
@@ -36,15 +37,21 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
    npm install
    ```
 
-3. **Configure repositories**:
-   Edit `static/config.yaml` to add your repositories:
+3. **Configure repository groups**:
+   Edit `static/config.yaml` to add your repository groups:
+
    ```yaml
-   repositories:
-     - name: "your-repo-name"
-       owner: "your-github-username"
-       url: "https://github.com/your-username/your-repo-name"
-       branch: "main"
+   repository_groups:
+     - name: "Frontend Projects"
+       slug: "frontend"
+       description: "All frontend applications and libraries"
        enabled: true
+       repositories:
+         - name: "your-repo-name"
+           owner: "your-github-username"
+           url: "https://github.com/your-username/your-repo-name"
+           branch: "main"
+           enabled: true
    ```
 
 4. **Start the development server**:
@@ -62,32 +69,51 @@ A modern SvelteKit-based Single Page Application (SPA) that monitors GitHub Acti
 Edit the `static/config.yaml` file to customize your monitoring setup:
 
 ```yaml
-# List of repositories to monitor
-repositories:
-  - name: "my-awesome-app"
-    owner: "mycompany"
-    url: "https://github.com/mycompany/my-awesome-app"
-    branch: "main"
+# Repository groups for better organization
+repository_groups:
+  - name: "Backend Services"
+    slug: "backend"
+    description: "Core API and microservices"
     enabled: true
+    repositories:
+      - name: "api-service"
+        owner: "mycompany"
+        url: "https://github.com/mycompany/api-service"
+        branch: "main"
+        enabled: true
 
-  - name: "api-service"
-    owner: "mycompany"
-    url: "https://github.com/mycompany/api-service"
-    branch: "develop"
+      - name: "auth-service"
+        owner: "mycompany"
+        url: "https://github.com/mycompany/auth-service"
+        branch: "main"
+        enabled: true
+
+  - name: "Frontend Applications"
+    slug: "frontend"
+    description: "Web applications and UI libraries"
     enabled: true
+    repositories:
+      - name: "web-app"
+        owner: "mycompany"
+        url: "https://github.com/mycompany/web-app"
+        branch: "develop"
+        enabled: true
 
 # GitHub API settings
 github:
-  # Optional: Add your GitHub personal access token for higher rate limits
-  token: ""
   api_url: "https://api.github.com"
 
 # Dashboard settings
 dashboard:
-  refresh_interval: 30        # Auto-refresh interval in seconds
-  max_runs_per_repo: 5       # Max workflow runs to display per repo
+  refresh_interval: 30              # Auto-refresh interval in seconds
+  max_runs_to_fetch: 20            # Max workflow runs to fetch per repo
   show_statuses: ["success", "failure", "in_progress"]
 ```
+
+**Navigation:**
+- The home page shows all repository groups as cards
+- Click "Monitor Workflows →" on any group card to view its repositories
+- Use the breadcrumb navigation to return to the groups overview
 
 ### GitHub Personal Access Token (Recommended)
 

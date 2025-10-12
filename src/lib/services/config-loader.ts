@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import type { Config } from '../types/github.js';
+import type { Config, RepositoryGroup, Repository } from '../types/github.js';
 
 // Configuration cache and watching
 let configCache: Config | null = null;
@@ -41,9 +41,17 @@ export async function loadConfigFromYaml(yamlContent: string): Promise<Config> {
 	try {
 		const config = yaml.load(yamlContent) as Config;
 
-		// Validate required fields
-		if (!config.repositories || !Array.isArray(config.repositories)) {
-			throw new Error('Invalid configuration: repositories must be an array');
+		// Validate required fields - support both new grouped format and legacy flat format
+		if (config.repository_groups) {
+			if (!Array.isArray(config.repository_groups)) {
+				throw new Error('Invalid configuration: repository_groups must be an array');
+			}
+		} else if (config.repositories) {
+			if (!Array.isArray(config.repositories)) {
+				throw new Error('Invalid configuration: repositories must be an array');
+			}
+		} else {
+			throw new Error('Invalid configuration: either repository_groups or repositories must be provided');
 		}
 
 		// Set defaults if not provided
@@ -64,4 +72,46 @@ export async function loadConfigFromYaml(yamlContent: string): Promise<Config> {
 		console.error('Failed to parse YAML configuration:', error);
 		throw new Error('YAML parsing failed');
 	}
+}
+
+// Get all repository groups from config
+export function getRepositoryGroups(config: Config): RepositoryGroup[] {
+	if (config.repository_groups) {
+		return config.repository_groups.filter(group => group.enabled);
+	}
+
+	// Legacy support: convert flat repository list to a single group
+	if (config.repositories) {
+		return [{
+			name: 'All Repositories',
+			slug: 'all',
+			description: 'All configured repositories',
+			enabled: true,
+			repositories: config.repositories
+		}];
+	}
+
+	return [];
+}
+
+// Get a specific repository group by slug
+export function getRepositoryGroupBySlug(config: Config, slug: string): RepositoryGroup | null {
+	const groups = getRepositoryGroups(config);
+	return groups.find(group => group.slug === slug) || null;
+}
+
+// Get all repositories from all enabled groups (useful for global operations)
+export function getAllRepositories(config: Config): Repository[] {
+	const groups = getRepositoryGroups(config);
+	const allRepositories: Repository[] = [];
+
+	for (const group of groups) {
+		for (const repo of group.repositories) {
+			if (repo.enabled) {
+				allRepositories.push(repo);
+			}
+		}
+	}
+
+	return allRepositories;
 }

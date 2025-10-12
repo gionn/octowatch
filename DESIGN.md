@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A SvelteKit-based Single Page Application (SPA) that monitors GitHub Actions workflows across multiple repositories. The dashboard provides real-time visibility into workflow statuses, helping teams track CI/CD pipeline health across their projects.
+A SvelteKit-based Single Page Application (SPA) that monitors GitHub Actions workflows across multiple repositories organized into groups. The dashboard provides real-time visibility into workflow statuses, helping teams track CI/CD pipeline health across their projects with improved organization and navigation.
 
 ## Architecture
 
@@ -19,25 +19,27 @@ A SvelteKit-based Single Page Application (SPA) that monitors GitHub Actions wor
 github-repository-monitoring/
 ├── src/
 │   ├── routes/
-│   │   ├── +layout.svelte          # Main layout
-│   │   └── +page.svelte            # Dashboard home page
+│   │   ├── +layout.svelte                    # Main layout
+│   │   ├── +page.svelte                      # Groups overview page
+│   │   └── groups/
+│   │       └── [slug]/
+│   │           └── +page.svelte              # Individual group monitoring
 │   ├── lib/
-│   │   ├── components/             # Reusable UI components
-│   │   │   ├── RepositoryCard.svelte
-│   │   │   ├── WorkflowStatus.svelte
+│   │   ├── components/                       # Reusable UI components
 │   │   │   └── RefreshButton.svelte
-│   │   ├── services/               # API and business logic
-│   │   │   ├── github-api.ts       # GitHub API client
-│   │   │   ├── config-loader.ts    # YAML configuration loader
-│   │   │   └── token-storage.ts    # Token and user settings storage
-│   │   ├── types/                  # TypeScript type definitions
-│   │   │   └── github.ts
-│   │   └── utils/                  # Utility functions
+│   │   ├── services/                         # API and business logic
+│   │   │   ├── github-api.ts                 # GitHub API client
+│   │   │   ├── config-loader.ts              # YAML configuration loader with groups
+│   │   │   └── token-storage.ts              # Token and user settings storage
+│   │   ├── types/                            # TypeScript type definitions
+│   │   │   └── github.ts                     # Repository and RepositoryGroup interfaces
+│   │   └── utils/                            # Utility functions
 │   │       └── date-formatter.ts
-│   ├── app.html                    # HTML template
-│   ├── app.css                     # Global styles
-│   └── app.d.ts                    # TypeScript declarations
-├── config.yaml                     # Repository configuration
+│   ├── app.html                              # HTML template
+│   ├── app.css                               # Global styles
+│   └── app.d.ts                              # TypeScript declarations
+├── static/
+│   └── config.yaml                           # Repository groups configuration
 ├── package.json
 └── README.md
 ```
@@ -45,23 +47,29 @@ github-repository-monitoring/
 ## Features
 
 ### Core Features (Implemented)
-1. **Collapsible Table View**: Display repositories with expandable workflow details
-2. **Cumulative Status Aggregation**: Smart status rollup showing worst-case per repository
-3. **Real-time Auto-refresh**: Configurable intervals with config file watching
-4. **Configuration Management**: YAML-based repository configuration with hot-reload
-5. **Responsive Design**: Table layout with horizontal scroll on mobile devices
-6. **Error Handling**: Comprehensive error display and graceful degradation
-7. **Dependabot Filtering**: User setting to hide workflows triggered by Dependabot
-8. **Settings Management**: Persistent localStorage-based settings with intuitive UI
+1. **Repository Groups**: Organize repositories into logical groups for better management
+2. **Multi-Page Navigation**: Home page shows groups, dedicated pages for each group
+3. **Collapsible Table View**: Display repositories with expandable workflow details
+4. **Cumulative Status Aggregation**: Smart status rollup showing worst-case per repository
+5. **Real-time Auto-refresh**: Configurable intervals with config file watching
+6. **Configuration Management**: YAML-based repository groups configuration with hot-reload
+7. **Responsive Design**: Card-based groups overview and table layout with mobile support
+8. **Error Handling**: Comprehensive error display and graceful degradation
+9. **Dependabot Filtering**: User setting to hide workflows triggered by Dependabot
+10. **Settings Management**: Persistent localStorage-based settings with intuitive UI
+
+### Navigation Structure
+- **Home Page (/)**: Displays all repository groups as cards with descriptions and repository counts
+- **Group Pages (/groups/[slug])**: Individual group monitoring with collapsible table view
+- **Breadcrumb Navigation**: Easy navigation between groups overview and specific groups
 
 ### Enhanced Features (Future)
-1. **Real-time Updates**: Auto-refresh workflow statuses
-2. **Detailed Workflow View**: Click to see individual workflow run details
-3. **Filtering & Sorting**: Filter by status, sort by last updated
-4. **Historical Data**: Show workflow run history and trends
-5. **Notifications**: Browser notifications for status changes
-6. **GitHub Authentication**: Personal access token integration
-7. **Multiple Branch Support**: Monitor different branches per repository
+1. **Detailed Workflow View**: Click to see individual workflow run details
+2. **Filtering & Sorting**: Filter by status, sort by last updated
+3. **Historical Data**: Show workflow run history and trends
+4. **Notifications**: Browser notifications for status changes
+5. **Multiple Branch Support**: Monitor different branches per repository
+6. **Group-level Status**: Aggregate status indicators across entire groups
 
 ## Architecture Design
 
@@ -123,15 +131,23 @@ interface Repository {
   enabled: boolean;
 }
 
-interface Config {
+interface RepositoryGroup {
+  name: string;
+  slug: string;
+  description: string;
+  enabled: boolean;
   repositories: Repository[];
+}
+
+interface Config {
+  repository_groups?: RepositoryGroup[];
+  repositories?: Repository[]; // Legacy support
   github: {
-    token?: string;
     api_url: string;
   };
   dashboard: {
     refresh_interval: number;
-    max_runs_per_repo: number;
+    max_runs_to_fetch: number;
     show_statuses: string[];
   };
 }

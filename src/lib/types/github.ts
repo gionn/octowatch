@@ -6,8 +6,17 @@ export interface Repository {
 	enabled: boolean;
 }
 
-export interface Config {
+export interface RepositoryGroup {
+	name: string;
+	slug: string;
+	description: string;
+	enabled: boolean;
 	repositories: Repository[];
+}
+
+export interface Config {
+	repository_groups?: RepositoryGroup[];
+	repositories?: Repository[]; // Legacy support
 	github: {
 		api_url: string;
 	};
