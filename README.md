@@ -69,12 +69,14 @@ If you prefer to run OctoWatch locally:
 #### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/your-username/octowatch.git
    cd octowatch
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
@@ -83,6 +85,7 @@ If you prefer to run OctoWatch locally:
    Edit `static/config.yaml` to add your repository groups (same as above)
 
 4. **Start the development server**:
+
    ```bash
    npm run dev
    ```
@@ -133,12 +136,14 @@ github:
 
 # Dashboard settings
 dashboard:
+  title: "GitHub Repository Groups"  # Main dashboard title
   refresh_interval: 30              # Auto-refresh interval in seconds
   max_runs_to_fetch: 20            # Max workflow runs to fetch per repo
   show_statuses: ["success", "failure", "in_progress"]
 ```
 
 **Navigation:**
+
 - The home page shows all repository groups as cards
 - Click "Monitor Workflows →" on any group card to view its repositories
 - Use the breadcrumb navigation to return to the groups overview
@@ -200,7 +205,7 @@ npm run dev
 
 ## Project Structure
 
-```
+```sh
 src/
 ├── routes/
 │   ├── +layout.svelte          # Main application layout
@@ -228,6 +233,7 @@ src/
 The dashboard displays repositories in a **collapsible table format**:
 
 **📋 Repository Summary (Collapsed by default):**
+
 - **▶/▼ Toggle**: Click to expand/collapse workflow details
 - **Repository Name**: Clickable link to GitHub repository
 - **Branch**: Monitored branch name
@@ -237,6 +243,7 @@ The dashboard displays repositories in a **collapsible table format**:
 - **View All**: Link to repository's GitHub Actions page
 
 **🔍 Expanded Details (Click to show):**
+
 - Individual workflow runs with full information
 - Workflow name, specific status, commit SHA, timing
 - Direct links to individual workflow run pages
@@ -258,21 +265,25 @@ The dashboard uses color coding with **smart status aggregation**:
 ### Common Issues
 
 **"Repository not found" errors**:
+
 - Verify repository names and owners in `config.yaml`
 - Check if repositories are public or if you have access
 - Ensure your GitHub token has appropriate permissions
 
 **Rate limit exceeded**:
+
 - Add a GitHub personal access token to `config.yaml`
 - Reduce the number of monitored repositories
 - Increase the refresh interval
 
 **Configuration errors**:
+
 - Validate your YAML syntax
 - Ensure all required fields are present
 - Check the browser console for detailed error messages
 
 **Dependabot workflows still showing**:
+
 - Open Settings (gear icon) and enable "Ignore Dependabot workflows"
 - Settings are saved automatically and take effect immediately
 - This filters workflows where the actor is "dependabot[bot]"
