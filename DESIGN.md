@@ -28,7 +28,7 @@ octowatch/
 │   │           └── +page.svelte              # Individual group monitoring
 │   ├── lib/
 │   │   ├── components/                       # Reusable UI components
-│   │   │   ├── RefreshButton.svelte          # Legacy refresh component
+│   │   │   ├── RefreshButton.svelte          # Manual refresh component
 │   │   │   └── HeaderActions.svelte          # Coordinated refresh & settings buttons
 │   │   ├── services/                         # API and business logic
 │   │   │   ├── github-api.ts                 # GitHub API client
@@ -93,7 +93,7 @@ The dashboard uses a **unified table approach** with collapsible functionality:
 **Supporting Components**:
 
 - `HeaderActions.svelte` - Reusable coordinated refresh and settings buttons
-- `RefreshButton.svelte` - Legacy refresh component (deprecated)
+- `RefreshButton.svelte` - Manual refresh component
 - Configuration and API services in `src/lib/services/`
 
 ### Collapsible Repository View
@@ -159,6 +159,7 @@ interface Config {
     api_url: string;
   };
   dashboard: {
+    title?: string;
     refresh_interval: number;
     max_runs_to_fetch: number;
     show_statuses: string[];
@@ -291,33 +292,31 @@ interface Repository {
 
 ## Configuration Examples
 
-### Basic Setup
+### Repository Groups (Recommended)
 
 ```yaml
-repositories:
-  - name: "my-app"
-    owner: "mycompany"
-    url: "https://github.com/mycompany/my-app"
-    branch: "main"
+repository_groups:
+  - name: "Frontend Projects"
+    slug: "frontend"
+    description: "Web applications and UI libraries"
     enabled: true
-```
+    repositories:
+      - name: "my-app"
+        owner: "mycompany"
+        url: "https://github.com/mycompany/my-app"
+        branch: "main"
+        enabled: true
 
-### Multiple Repositories
+# Dashboard settings
+dashboard:
+  title: "My Project Dashboard"
+  refresh_interval: 30
+  max_runs_to_fetch: 20
+  show_statuses: ["success", "failure", "in_progress"]
 
-```yaml
-repositories:
-  - name: "frontend"
-    owner: "mycompany"
-    branch: "main"
-    enabled: true
-  - name: "backend"
-    owner: "mycompany"
-    branch: "develop"
-    enabled: true
-  - name: "mobile-app"
-    owner: "mycompany"
-    branch: "main"
-    enabled: false
+# GitHub API settings
+github:
+  api_url: "https://api.github.com"
 ```
 
 ## Deployment Considerations
@@ -326,12 +325,12 @@ repositories:
 
 - Compatible with Vercel, Netlify, GitHub Pages
 - Requires CORS configuration for GitHub API calls
-- Environment variables for GitHub tokens
+- Tokens managed via browser localStorage through Settings UI
 
 ### Security
 
 - Never commit GitHub tokens to repository
-- Use environment variables for sensitive data
+- Tokens stored securely in browser localStorage
 - Implement proper CORS policies
 - Consider using GitHub Apps for enhanced security
 - Client-side token storage uses browser localStorage (secure for SPA)

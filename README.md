@@ -175,15 +175,6 @@ The dashboard includes a settings panel (gear icon) where you can:
 - **Dependabot Filtering**: Choose to hide workflows triggered by Dependabot
 - Settings are automatically saved to localStorage and persist across sessions
 
-### Environment Variables
-
-You can also use environment variables:
-
-```bash
-export GITHUB_TOKEN=your_github_token_here
-npm run dev
-```
-
 ## Repository Configuration Options
 
 | Field | Description | Required |
@@ -209,9 +200,12 @@ npm run dev
 src/
 ├── routes/
 │   ├── +layout.svelte          # Main application layout
-│   └── +page.svelte            # Dashboard home page
+│   ├── +page.svelte            # Dashboard home page
+│   └── groups/[slug]/          # Individual group pages
+│       └── +page.svelte
 ├── lib/
 │   ├── components/             # Reusable UI components
+│   │   ├── HeaderActions.svelte
 │   │   └── RefreshButton.svelte
 │   ├── services/               # API and business logic
 │   │   ├── github-api.ts       # GitHub API integration
@@ -272,7 +266,7 @@ The dashboard uses color coding with **smart status aggregation**:
 
 **Rate limit exceeded**:
 
-- Add a GitHub personal access token to `config.yaml`
+- Add a GitHub personal access token via the Settings panel (gear icon)
 - Reduce the number of monitored repositories
 - Increase the refresh interval
 
