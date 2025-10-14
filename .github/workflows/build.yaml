@@ -30,7 +30,7 @@ jobs:
       - run: npm run check
       - name: build
         env:
-          BASE_PATH: "${{ vars.GH_PAGES_BASE_PATH || format('/{0}', github.event.repository.name) }}"
+          BASE_PATH: "${{ vars.GH_PAGES_BASE_PATH || '' }}"
         run: |
           npm run build
 

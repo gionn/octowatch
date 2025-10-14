@@ -47,11 +47,20 @@ The easiest way to get started with OctoWatch is to fork this repository and dep
    - Set Source to "GitHub Actions"
    - The included `build.yaml` workflow will automatically build and deploy your dashboard
 
-4. **Access your dashboard**:
+4. **Configure the base path** (if deploying to a subpath):
+   - Go to your fork's Settings → Secrets and Variables → Repository variables
+   - Add a variable named `GH_PAGES_BASE_PATH` with the value set to your
+     repository name (e.g., `/your-repo-name` with the default GitHub Pages URL
+     structure)
+   - This ensures all links and assets load correctly
+   - If you are deploying to a root domain, you don't need to set this variable
+     (GitHub doesn't allow creating empty variables)
+
+5. **Access your dashboard**:
    Your OctoWatch dashboard will be available at:
    `https://your-username.github.io/octowatch`
 
-5. **Configure GitHub token** (optional but recommended):
+6. **Configure GitHub token** (optional but recommended):
    - Generate a GitHub Personal Access Token (fine-grained tokens recommended with "Actions" read-only access)
    - Open your deployed dashboard and click the gear icon
    - Enter your token for better rate limits and private repo access
